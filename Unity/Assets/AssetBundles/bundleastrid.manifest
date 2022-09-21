@@ -1,0 +1,35 @@
+ManifestFileVersion: 0
+CRC: 3768160514
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: dc7f90ff2ccbd4e315c49156efbf8ad8
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2313008bd894d3659c089a6ebec8b32e
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+- Class: 153
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/allInOnePrefabAstrid.prefab
+Dependencies: []
