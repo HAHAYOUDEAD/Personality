@@ -12,7 +12,7 @@ using System.Linq;
 namespace CharacterCustomizer
 {
 
-    public static class Equipment
+    public static class Equipment // all equipment
     {
         // allEquipment[character][clothingSet][slot] == Equip
         public static Dictionary<Character, Dictionary<string, Dictionary<Slot, Equip>>> allEquipment = new Dictionary<Character, Dictionary<string, Dictionary<Slot, Equip>>>()
@@ -34,20 +34,20 @@ namespace CharacterCustomizer
             { Slot.Trinkets, null }
         };
 
-        public static void RegisterEquip(string clothingSet, Character character, Slot slot, string textureName, GameObject normalVariant, GameObject undermaskVariant, GameObject injuredVariant, SpecialFlag specialFlag = SpecialFlag.None)
+        public static void RegisterEquip(string clothingSet, Character character, Slot slot, string textureName, GameObject normal, GameObject undermask, GameObject injured, SpecialFlag specialFlag = SpecialFlag.None)
         {
             Equip newEquip = new Equip()
             {
                 clothingSet = clothingSet,
                 textureName = textureName,
                 slot = slot,
-                normalVariantPrefab = normalVariant,
-                undermaskVariantPrefab = undermaskVariant,
-                injuredVariantPrefab = injuredVariant,
+                normalVariantPrefab = normal,
+                undermaskVariantPrefab = undermask,
+                injuredVariantPrefab = injured,
                 specialFlag = specialFlag
             };
 
-            allEquipment[Character.Astrid][clothingSet][slot] = newEquip;
+            allEquipment[character][clothingSet][slot] = newEquip;
         }
 
         public static Dictionary<Slot, Equip> GetClothingSet(string clothingSet)
@@ -71,6 +71,8 @@ namespace CharacterCustomizer
 
         public static string CheckSlotShouldBeChanged(Slot slot, string clothingSet)
         {
+            if (currentEquipment[slot] == null) return null;
+
             if (currentEquipment[slot].clothingSet != clothingSet)
             {
                 if (GetEquipForSlot(slot, clothingSet) != null)
@@ -137,8 +139,8 @@ namespace CharacterCustomizer
             ChangeEquipVariant(Slot.Trinkets, enable ? PartVariant.Normal : PartVariant.Disabled);
         }
     }
-
-    public class Equip
+    
+    public class Equip // one particular clothing
     {
         public string clothingSet;
 
@@ -150,9 +152,9 @@ namespace CharacterCustomizer
         public GameObject undermaskVariantPrefab = null;
         public GameObject injuredVariantPrefab = null;
 
-        public GameObject normalVariantInstance = null;
-        public GameObject undermaskVariantInstance = null;
-        public GameObject injuredVariantInstance = null;
+        public GameObject normalVariant = null;
+        public GameObject undermaskVariant = null;
+        public GameObject injuredVariant = null;
 
         public GameObject currentVariant = null;
         public PartVariant currentVariantEnum = PartVariant.Undefined;
@@ -169,15 +171,15 @@ namespace CharacterCustomizer
             }
             else if (e == PartVariant.Normal)
             {
-                currentVariant = normalVariantInstance;
+                currentVariant = normalVariant;
             }
             else if (e == PartVariant.Injured)
             {
-                currentVariant = injuredVariantInstance;
+                currentVariant = injuredVariant;
             }
             else if (e == PartVariant.Undermask)
             {
-                currentVariant = undermaskVariantInstance;
+                currentVariant = undermaskVariant;
             }
             currentVariantEnum = e;
             if (currentVariant) currentVariant.active = true;

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CharacterCustomizer</RootNamespace>
-    <AssemblyName>CharacterCustomizer</AssemblyName>
+    <AssemblyName>Personality</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -119,7 +119,6 @@
     <Compile Include="Equipment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="UnbreakablePatches.cs" />
     <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -131,7 +130,6 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /y /d  "$(TargetPath)" "S:\Program Files (x86)\Steam\steamapps\common\TheLongDark\Mods"</PostBuildEvent>
   </PropertyGroup>
 </Project>

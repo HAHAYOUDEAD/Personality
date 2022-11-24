@@ -1,7 +1,10 @@
 ManifestFileVersion: 0
-CRC: 14977209
+CRC: 330745804
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
+      Name: bundlewill
+      Dependencies: {}
+    Info_1:
       Name: bundleastrid
       Dependencies: {}

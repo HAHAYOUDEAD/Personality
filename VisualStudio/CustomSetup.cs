@@ -27,31 +27,20 @@ namespace CharacterCustomizer
         public static Shader vanillaDefaultShader;
 
 
-
         // vanilla mesh operations
-        public static GameObject GetVanillaHandsObject(Character character)
+        public static GameObject[] GetVanillaHandsObject(Character character)
         {
             if (character == Character.Will || character == Character.Lincoln)
             {
-                if (CCMain.vanillaMaleHandsMesh) return CCMain.vanillaMaleHandsMesh;
-
-                else
-                {
-                    CCMain.vanillaMaleHandsMesh = CCMain.vanillaCharacter?.transform?.Find("NEW_FPHand_Rig/GAME_DATA/Clothing/FPH_Male_Arms/GAME_DATA/Meshes/Will_Hands")?.gameObject;
-                    return CCMain.vanillaMaleHandsMesh;
-                }
+                CCMain.vanillaMaleHandsMesh = new GameObject[] { CCMain.vanillaCharacter?.transform?.Find("NEW_FPHand_Rig/GAME_DATA/Clothing/FPH_Male_Arms/GAME_DATA/Meshes/Will_Hands")?.gameObject,
+                        CCMain.vanillaCharacter?.transform?.Find("NEW_FPHand_Rig/GAME_DATA/Clothing/FPH_Male_Arms/GAME_DATA/Meshes/Will_Sleeves")?.gameObject };
+                return CCMain.vanillaMaleHandsMesh;
             }
 
             if (character == Character.Astrid || character == Character.Marcene)
             {
-                
-                if (CCMain.vanillaFemaleHandsMesh) return CCMain.vanillaFemaleHandsMesh;
-
-                else
-                {
-                    CCMain.vanillaFemaleHandsMesh = CCMain.vanillaCharacter?.transform?.Find("NEW_FPHand_Rig/GAME_DATA/Clothing/FPH_Female_Arms/GAME_DATA/Meshes/Astrid_Arms_NoRing")?.gameObject;
-                    return CCMain.vanillaFemaleHandsMesh;
-                }
+                CCMain.vanillaFemaleHandsMesh = new GameObject[] { CCMain.vanillaCharacter?.transform?.Find("NEW_FPHand_Rig/GAME_DATA/Clothing/FPH_Female_Arms/GAME_DATA/Meshes/Astrid_Arms_NoRing")?.gameObject };
+                return CCMain.vanillaFemaleHandsMesh;
             }
 
             return null;
@@ -61,11 +50,14 @@ namespace CharacterCustomizer
         {
             Utility.Log(ConsoleColor.Gray, "HideVanillaHands - Start");
 
-            GameObject vanillaHands = GetVanillaHandsObject(character);
+            GameObject[] vanillaHands = GetVanillaHandsObject(character);
 
-            if (!vanillaHands) return;
+            if (vanillaHands.Length == 0) return;
 
-            vanillaHands.active = !hideVanillaHands;
+            foreach (GameObject go in vanillaHands)
+            {
+                go.active = !hideVanillaHands;
+            }
 
             Utility.Log(ConsoleColor.DarkYellow, "HideVanillaHands - Done");
         }
@@ -73,30 +65,42 @@ namespace CharacterCustomizer
         // custom mesh operations
         public static GameObject SetupCustomMesh(GameObject go, Character character, bool stealBones = true, bool useCustomBones = false)
         {
+            Utility.Log(ConsoleColor.Gray, "SetupCustomMesh - Start");
             GameObject tempGo;
-            GameObject vanillaHands = GetVanillaHandsObject(character);
+            GameObject vanillaHands = GetVanillaHandsObject(character)?[0];
 
-            if (!vanillaHands) return go;
+            if (!vanillaHands)
+            {
+                Utility.Log(ConsoleColor.Yellow, "SetupCustomMesh - Couldn't grab vanilla hands");
+                return go;
+            }
 
             tempGo = GameObject.Instantiate(go);
-            tempGo.layer = renderLayer;
-            tempGo.GetComponent<SkinnedMeshRenderer>().sharedMaterial.shader = vanillaSkinnedShader;
 
-            tempGo.GetComponent<SkinnedMeshRenderer>().updateWhenOffscreen = true;
-            tempGo.GetComponent<SkinnedMeshRenderer>().castShadows = false;
-            
             tempGo.transform.SetParent(vanillaHands.transform.GetParent());
 
-            if (stealBones)
+            foreach (Transform child in Utility.GetAllChildrenRecursive(tempGo.transform))
             {
-                tempGo.AddComponent(vanillaHands.GetComponent<UseParentBones>());
-                tempGo.GetComponent<UseParentBones>().DoWork();
+                child.gameObject.name = go.name;
+                child.gameObject.layer = renderLayer;
+                child.gameObject.GetComponent<SkinnedMeshRenderer>().sharedMaterial.shader = vanillaSkinnedShader;
+
+                child.gameObject.GetComponent<SkinnedMeshRenderer>().updateWhenOffscreen = true;
+                child.gameObject.GetComponent<SkinnedMeshRenderer>().castShadows = false;
+
+
+                if (stealBones)
+                {
+                    child.gameObject.AddComponent(vanillaHands.GetComponent<UseParentBones>());
+                    child.gameObject.GetComponent<UseParentBones>().DoWork();
+                }
             }
+
+            
 
             if (useCustomBones)
             {
                 Transform[] customBones = tempGo.GetComponent<SkinnedMeshRenderer>().bones;
-                //Transform[] goodBones = new Transform[badBones.Length];
 
                 for (int i = 0; i < customBones.Length; i++)
                 {
@@ -109,6 +113,7 @@ namespace CharacterCustomizer
                 tempGo.GetComponent<SkinnedMeshRenderer>().bones = customBones;
             }
 
+            Utility.Log(ConsoleColor.DarkYellow, "SetupCustomMesh - Done");
             return tempGo;
         }
 
@@ -123,6 +128,7 @@ namespace CharacterCustomizer
                     GameObject.Destroy(entry.Value);
                 }
             }
+            currentCustomBones = new Dictionary<string, GameObject>();
             Utility.Log(ConsoleColor.DarkYellow, "RemovePhysicsBones - Done");
         }
 
@@ -171,10 +177,9 @@ namespace CharacterCustomizer
         public static IEnumerator ApplyCustomTextures(Character character)
         {
             List<string> tempNames = new List<string>();
-
             Dictionary<Slot, Equip> equips = Equipment.allEquipment[character]["Default"];
 
-            if (Settings.options.displayProperClothes) // only change hands texture when all clothes enabled
+            if (Settings.options.displayProperClothes) // when proper clothes enabled, only change arms texture
             {
                 equips = new Dictionary<Slot, Equip>()
                 {
@@ -182,14 +187,13 @@ namespace CharacterCustomizer
                     { Slot.Hands, equips[Slot.Hands] }
                 };
             }
-
             //Equip[] equips = Equipment.GetAllEquipment(character);
 
             foreach (Equip e in equips.Values)
             {
+                if (e == null) continue;
                 if (!tempNames.Contains(e.textureName)) tempNames.Add(e.textureName);
             }
-
             List<Texture2D> tempTextures = new List<Texture2D>();
 
             foreach (string n in tempNames)
@@ -198,7 +202,7 @@ namespace CharacterCustomizer
                 byte[] file = null;
                 try
                 {
-                    file = File.ReadAllBytes("Mods/characterCustomizer/customTextures/" + n + ".png");
+                    file = File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/customTextures/" + n + ".png");
                 }
                 catch (Exception)
                 {
@@ -217,11 +221,12 @@ namespace CharacterCustomizer
             {
                 foreach (Texture2D tex in tempTextures)
                 {
+                    if (e == null) continue;
                     if (tex.name == e.textureName)
                     {
-                        if (e.normalVariantInstance) e.normalVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
-                        if (e.undermaskVariantInstance) e.undermaskVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
-                        if (e.injuredVariantInstance) e.injuredVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                        if (e.normalVariant) e.normalVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                        if (e.undermaskVariant) e.undermaskVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                        if (e.injuredVariant) e.injuredVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
                     }
                 }
             }
@@ -234,13 +239,13 @@ namespace CharacterCustomizer
         public static void TintTexture(Slot slot, int H, int S, int L)
         {
 
-            Color color = Color.HSVToRGB(H / 360f, S / 100f, L / 100f);
+            Color color = Utility.HslToRgb(H / 360f, S / 100f, L / 100f);
 
             Equip equip = Equipment.allEquipment[currentCharacter]["Default"][slot];
 
-            if (equip.normalVariantInstance) equip.normalVariantInstance.GetComponent<SkinnedMeshRenderer>().material.color = color;
-            if (equip.undermaskVariantInstance) equip.undermaskVariantInstance.GetComponent<SkinnedMeshRenderer>().material.color = color;
-            if (equip.injuredVariantInstance) equip.injuredVariantInstance.GetComponent<SkinnedMeshRenderer>().material.color = color;
+            if (equip.normalVariant) equip.normalVariant.GetComponent<SkinnedMeshRenderer>().material.color = color;
+            if (equip.undermaskVariant) equip.undermaskVariant.GetComponent<SkinnedMeshRenderer>().material.color = color;
+            if (equip.injuredVariant) equip.injuredVariant.GetComponent<SkinnedMeshRenderer>().material.color = color;
 
             Utility.Log(ConsoleColor.Cyan, "TintTexture - Done. Changed texture to " + color.ToString());
         }
@@ -251,12 +256,10 @@ namespace CharacterCustomizer
             PartVariant visible = PartVariant.Normal;
             PartVariant disabled = PartVariant.Disabled;
             PartVariant injured = PartVariant.Injured;
-            //PartVariant masked = PartVariant.Undermask;
 
             if (meshSet == Outfit.Indoors || meshSet == Outfit.Injured) Equipment.ChangeEquipVariant(disabled, visible, disabled);
             if (meshSet == Outfit.Undressed) Equipment.ChangeEquipVariant(disabled, disabled, disabled);
             if (meshSet == Outfit.Outdoors) Equipment.ChangeEquipVariant(visible, visible, visible);
-            //if (meshSet == Outfit.Injured) Equipment.ChangeEquipVariant(injured, disabled, disabled, injured, disabled);
 
             currentMeshSet = meshSet;
 
@@ -270,21 +273,23 @@ namespace CharacterCustomizer
             PartVariant injured = PartVariant.Injured;
             PartVariant masked = PartVariant.Undermask;
 
-            if (Equipment.currentEquipment[Slot.Gloves].currentVariantEnum == visible)
-            {
-                Equipment.ChangeEquipVariant(Slot.Hands, masked);
-            }
-            else if (Equipment.currentEquipment[Slot.Gloves].currentVariantEnum == disabled)
+            //MelonLogger.Msg("a " + Equipment.currentEquipment[Slot.Gloves]);
+            if (Equipment.currentEquipment[Slot.Gloves] == null || Equipment.currentEquipment[Slot.Gloves].normalVariant == null || Equipment.currentEquipment[Slot.Gloves].currentVariantEnum == disabled)
             {
                 if (isInjured) Equipment.ChangeEquipVariant(Slot.Hands, injured);
                 else Equipment.ChangeEquipVariant(Slot.Hands, visible);
             }
+            else if (Equipment.currentEquipment[Slot.Gloves].currentVariantEnum == visible)
+            {
+                Equipment.ChangeEquipVariant(Slot.Hands, masked);
+            }
+
+            //if (Equipment.currentEquipment[Slot.Shirt] == null) return;
 
             if (Equipment.currentEquipment[Slot.Shirt].currentVariantEnum == masked && Equipment.currentEquipment[Slot.Jacket].currentVariantEnum != visible)
             {
                 Equipment.ChangeEquipVariant(Slot.Shirt, visible);
             }
-
             if (Equipment.currentEquipment[Slot.Shirt].currentVariantEnum == visible)
             {
                 if (isInjured) Equipment.ChangeEquipVariant(Slot.Shirt, injured);
@@ -299,6 +304,7 @@ namespace CharacterCustomizer
                 if (!isInjured) Equipment.ChangeEquipVariant(Slot.Shirt, visible);
             }
 
+            //if (Equipment.currentEquipment[Slot.Jacket] == null) return;
 
             if (Equipment.currentEquipment[Slot.Jacket].currentVariantEnum == visible && Equipment.currentEquipment[Slot.Shirt].currentVariantEnum != disabled)
             {
@@ -327,10 +333,8 @@ namespace CharacterCustomizer
             if (Settings.options.displayProperClothes)
             {
                 currentMeshSet = Outfit.Custom;
-                if (Settings.options.showInjuries)
-                {
-                    AutoSwitchMeshVariant(CCChecks.currentlyInjured);
-                }
+                AutoSwitchMeshVariant();
+                
                 Utility.Log(ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
                 return;
             }
@@ -341,13 +345,13 @@ namespace CharacterCustomizer
             Outfit newOutfit = Outfit.Undefined; 
 
             // swith between indoors/ outdoors when enabled
-            if (Settings.options.undressIndoors)
+            if (Settings.options.dynamicOutfit)
             {
-                if (CCChecks.currentLocation == "indoors") newOutfit = Outfit.Indoors;
-                if (CCChecks.currentLocation == "outdoors") newOutfit = Outfit.Outdoors;
+                if (CCChecks.currentlyIndoors) newOutfit = Outfit.Indoors;
+                if (!CCChecks.currentlyIndoors) newOutfit = Outfit.Outdoors;
             }
 
-            // change default appearance if auto switch disabled
+            // change default appearance if auto switch disabled 
             else
             {
                 switch (Settings.options.defaultAppearance)
@@ -368,7 +372,7 @@ namespace CharacterCustomizer
             }
 
             // switch between injured/normal
-            if (newOutfit == Outfit.Indoors && Settings.options.showInjuries)
+            if (newOutfit == Outfit.Indoors && Settings.options.dynamicOutfit)
             {
                 if (CCChecks.currentlyInjured && currentMeshSet != Outfit.Injured)
                 {
@@ -384,17 +388,37 @@ namespace CharacterCustomizer
             Utility.Log(ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
         }
 
+        public static void UpdateClothingSlots()
+        {
+            bool changed = false;
+
+            GearItem ChestBase = GameManager.GetPlayerManagerComponent().GetClothingInSlot(ClothingRegion.Chest, ClothingLayer.Base);
+            GearItem ChestMid = GameManager.GetPlayerManagerComponent().GetClothingInSlot(ClothingRegion.Chest, ClothingLayer.Mid);
+            GearItem ChestTop = GameManager.GetPlayerManagerComponent().GetClothingInSlot(ClothingRegion.Chest, ClothingLayer.Top);
+            GearItem ChestTop2 = GameManager.GetPlayerManagerComponent().GetClothingInSlot(ClothingRegion.Chest, ClothingLayer.Top2);
+            GearItem Gloves = GameManager.GetPlayerManagerComponent().GetClothingInSlot(ClothingRegion.Hands, ClothingLayer.Base);
+
+            GearItem Shirt = ChestMid ? ChestMid : ChestBase;
+            GearItem Jacket = ChestTop2 ? ChestTop2 : ChestTop;
+
+            if (CCChecks.UpdateSlotIfNeeded(Shirt, Slot.Shirt)) changed = true;
+            if (CCChecks.UpdateSlotIfNeeded(Jacket, Slot.Jacket)) changed = true;
+            if (CCChecks.UpdateSlotIfNeeded(Gloves, Slot.Gloves)) changed = true;
+
+            if (changed) CCSetup.SmartUpdateOutfit();
+        }
+
         public static void DoEverything(Character character, int arg, int specificArg = 0)
         {
             // 1 get active player hands for mesh replacement
             if (arg >= 1 || specificArg == 1)
             {
-                if (!GetVanillaHandsObject(character))
+                if (GetVanillaHandsObject(character).Length == 0)
                 {
                     Utility.Log(ConsoleColor.Red, "Couldn't load vanilla arms, returning");
                     return;
                 }
-                else Utility.Log(ConsoleColor.DarkCyan, $"1 - Vanilla arms mesh for is loaded, character: {character}");
+                else Utility.Log(ConsoleColor.DarkCyan, $"1 - Vanilla arms mesh is loaded, character: {character}");
 
                 if (specificArg == 1) return;
             }
@@ -402,31 +426,37 @@ namespace CharacterCustomizer
             // 2 transfer bone components from vanilla arms to custom meshes
             if (arg >= 2 || specificArg == 2)
             {
-                RemovePhysicsBones();
-                currentCustomBones = new Dictionary<string, GameObject>();
+                /*
+                if (character == Character.Astrid)
+                {
+                    RemovePhysicsBones();
+                    
+                    if (!currentPhysicsObject) currentPhysicsObject = GameObject.Instantiate(CCMain.physicsObjectAstrid);
 
-                currentPhysicsObject = GameObject.Instantiate(CCMain.physicsObjectAstrid);
-
-                SetupPhysicsBones(currentPhysicsObject); // should be done before SetupCustomMesh
-
+                    SetupPhysicsBones(currentPhysicsObject); // should be done before SetupCustomMesh
+                    
+                }
+                */
+                
                 foreach (Dictionary<Slot, Equip> equipDict in Equipment.allEquipment[character].Values)
                 {
                     foreach (Equip equip in equipDict.Values)
                     {
-                        if (equip.normalVariantPrefab) equip.normalVariantPrefab.active = false;
-                        if (equip.undermaskVariantPrefab) equip.undermaskVariantPrefab.active = false;
-                        if (equip.injuredVariantPrefab) equip.injuredVariantPrefab.active = false;
+                        if (equip == null) continue;
+                        if (equip.normalVariant) equip.normalVariant.active = false;
+                        if (equip.undermaskVariant) equip.undermaskVariant.active = false;
+                        if (equip.injuredVariant) equip.injuredVariant.active = false;
 
                         if (equip.slot == Slot.Trinkets)
                         {
-                            if (equip.normalVariantPrefab) equip.normalVariantInstance = SetupCustomMesh(equip.normalVariantPrefab, character, true, true);
+                            if (equip.normalVariant) equip.normalVariant = SetupCustomMesh(equip.normalVariant, character, true, true);
                             continue;
                         }
                         else
                         {
-                            if (equip.normalVariantPrefab) equip.normalVariantInstance = SetupCustomMesh(equip.normalVariantPrefab, character, true, false);
-                            if (equip.undermaskVariantPrefab) equip.undermaskVariantInstance = SetupCustomMesh(equip.undermaskVariantPrefab, character, true, false);
-                            if (equip.injuredVariantPrefab) equip.injuredVariantInstance = SetupCustomMesh(equip.injuredVariantPrefab, character, true, false);
+                            if (equip.normalVariantPrefab && !equip.normalVariant) equip.normalVariant = SetupCustomMesh(equip.normalVariantPrefab, character, true, false);
+                            if (equip.undermaskVariantPrefab && !equip.undermaskVariant) equip.undermaskVariant = SetupCustomMesh(equip.undermaskVariantPrefab, character, true, false);
+                            if (equip.injuredVariantPrefab && !equip.injuredVariant) equip.injuredVariant = SetupCustomMesh(equip.injuredVariantPrefab, character, true, false);
                         }
                     }
                 }
@@ -434,6 +464,11 @@ namespace CharacterCustomizer
                 SetClothesToDefault();
                 SmartUpdateOutfit();
                 HideVanillaHands(character, true);
+
+                if (Settings.options.displayProperClothes)
+                {
+                    UpdateClothingSlots();
+                }
 
                 Utility.Log(ConsoleColor.DarkCyan, $"2 - Stole bone components to activate custom mesh rigs, character:{character}");
 
@@ -458,21 +493,25 @@ namespace CharacterCustomizer
 
                     foreach (Equip equip in equips.Values)
                     {
+                        if (equip == null) continue;
                         Texture tex = equip.normalVariantPrefab?.GetComponent<SkinnedMeshRenderer>().material.mainTexture;
 
                         if (tex)
                         {
-                            if (equip.normalVariantInstance) equip.normalVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
-                            if (equip.undermaskVariantInstance) equip.undermaskVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
-                            if (equip.injuredVariantInstance) equip.injuredVariantInstance.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                            if (equip.normalVariant) equip.normalVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                            if (equip.undermaskVariant) equip.undermaskVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
+                            if (equip.injuredVariant) equip.injuredVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
                         }
                     }
 
                     Utility.Log(ConsoleColor.DarkCyan, $"3 - Reloaded textures from prefabs, character:{character}");
                 }
 
-                TintTexture(Slot.Hands, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
-                TintTexture(Slot.Arms, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
+                if (Settings.options.useTextureTint)
+                {
+                    TintTexture(Slot.Hands, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
+                    TintTexture(Slot.Arms, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
+                }
 
                 if (specificArg == 3) return;
             }
@@ -518,10 +557,10 @@ namespace CharacterCustomizer
                 Texture2D feetTex = new Texture2D(2, 2, TextureFormat.ARGB32, false);
                 Texture2D bodyTex = new Texture2D(2, 2, TextureFormat.ARGB32, false);
 
-                ImageConversion.LoadImage(headTex, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/F/head.png"));
-                ImageConversion.LoadImage(handsTex, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/F/hands.png"));
-                ImageConversion.LoadImage(feetTex, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/F/feet.png"));
-                ImageConversion.LoadImage(bodyTex, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/F/body.png"));
+                ImageConversion.LoadImage(headTex, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/F/head.png"));
+                ImageConversion.LoadImage(handsTex, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/F/hands.png"));
+                ImageConversion.LoadImage(feetTex, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/F/feet.png"));
+                ImageConversion.LoadImage(bodyTex, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/F/body.png"));
 
                 dollFHead.GetComponent<UITexture>().mainTexture = headTex;
                 dollFHands.GetComponent<UITexture>().mainTexture = handsTex;
@@ -533,10 +572,10 @@ namespace CharacterCustomizer
                 Texture2D feetTex2 = new Texture2D(2, 2, TextureFormat.ARGB32, false);
                 Texture2D bodyTex2 = new Texture2D(2, 2, TextureFormat.ARGB32, false);
 
-                ImageConversion.LoadImage(headTex2, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/M/head.png"));
-                ImageConversion.LoadImage(handsTex2, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/M/hands.png"));
-                ImageConversion.LoadImage(feetTex2, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/M/feet.png"));
-                ImageConversion.LoadImage(bodyTex2, File.ReadAllBytes("Mods/characterCustomizer/paperDoll/M/body.png"));
+                ImageConversion.LoadImage(headTex2, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/M/head.png"));
+                ImageConversion.LoadImage(handsTex2, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/M/hands.png"));
+                ImageConversion.LoadImage(feetTex2, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/M/feet.png"));
+                ImageConversion.LoadImage(bodyTex2, File.ReadAllBytes("Mods/" + CCMain.modFolderName + "/paperDoll/M/body.png"));
 
                 dollMHead.GetComponent<UITexture>().mainTexture = headTex2;
                 dollMHands.GetComponent<UITexture>().mainTexture = handsTex2;

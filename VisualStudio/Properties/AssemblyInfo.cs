@@ -7,12 +7,12 @@ using CharacterCustomizer;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: MelonInfo(typeof(CCMain), "CharacterCustomizer", "0.1a", "Waltz", "")]
+[assembly: MelonInfo(typeof(CCMain), "Personality", "0.5.0-beta", "Waltz", "")]
 [assembly: MelonGame("Hinterland", "TheLongDark")]
-[assembly: AssemblyTitle("CharacterCustomizer")]
+[assembly: AssemblyTitle("Personality")]
 [assembly: AssemblyDescription("Change your character to your liking")]
 [assembly: AssemblyCompany("Waltz")]
-[assembly: AssemblyProduct("CharacterCustomizer")]
+[assembly: AssemblyProduct("Personality")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
 // to COM components.  If you need to access a type in this assembly from
