@@ -9,7 +9,7 @@ https://user-images.githubusercontent.com/46863862/203854709-c9b64ea2-1102-49a4-
 - Barebones option to tint hands texture
 
 # Installation
-Required [ModSettings](https://github.com/zeobviouslyfakeacc/ModSettings/releases)
+Requires [ModSettings](https://github.com/zeobviouslyfakeacc/ModSettings/releases)
 
 Get the latest [release](https://github.com/HAHAYOUDEAD/Personality/releases) and extract into `.../Mods/`
 
