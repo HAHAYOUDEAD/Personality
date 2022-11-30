@@ -9,9 +9,11 @@ https://user-images.githubusercontent.com/46863862/203854709-c9b64ea2-1102-49a4-
 - Barebones option to tint hands texture
 
 # Installation
-Requires [ModSettings](https://github.com/zeobviouslyfakeacc/ModSettings/releases)
+Install [MelonLoader](https://github.com/LavaGang/MelonLoader) if it's your first mod
 
 Get the latest [release](https://github.com/HAHAYOUDEAD/Personality/releases) and extract into `.../Mods/`
+
+Requires [ModSettings](https://github.com/zeobviouslyfakeacc/ModSettings/releases) (also just drop it's .dll into `.../Mods/`)
 
 # Possible upcoming features
 - Make compatible with mods that use custom arms (Pastime Reading, Binoculars)
