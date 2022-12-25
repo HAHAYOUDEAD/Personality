@@ -8,8 +8,9 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.Linq;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+namespace Personality
 {
 
     public static class Equipment // all equipment
@@ -91,14 +92,14 @@ namespace CharacterCustomizer
 
         public static void ChangeEquipIfExistsOtherwiseDefault(Slot slot, string clothingSet)
         {
-            Utility.Log(ConsoleColor.Gray, "ChangeEquipIfExistsOtherwiseDefault - Start");
+            Utility.Log(System.ConsoleColor.Gray, "ChangeEquipIfExistsOtherwiseDefault - Start");
 
             Equip equip = GetEquipForSlot(slot, clothingSet);
 
             if (equip == null)
             {
                 GetEquipForSlot(slot, "Default");
-                Utility.Log(ConsoleColor.DarkGray, $"ChangeEquipIfExistsOtherwiseDefault - couldn't find available slot {slot} in {clothingSet}, checking 'Default'");
+                Utility.Log(System.ConsoleColor.DarkGray, $"ChangeEquipIfExistsOtherwiseDefault - couldn't find available slot {slot} in {clothingSet}, checking 'Default'");
             }
 
             PartVariant prevVariant = PartVariant.Normal;
@@ -113,10 +114,10 @@ namespace CharacterCustomizer
             }
 
             if (equip != null) equip.SwapVariant(prevVariant);
-            else Utility.Log(ConsoleColor.DarkGray, $"ChangeEquipIfExistsOtherwiseDefault - couldn't find available slot {slot}");
+            else Utility.Log(System.ConsoleColor.DarkGray, $"ChangeEquipIfExistsOtherwiseDefault - couldn't find available slot {slot}");
 
             currentEquipment[slot] = equip;
-            Utility.Log(ConsoleColor.DarkYellow, "ChangeEquipIfExistsOtherwiseDefault - Done");
+            Utility.Log(System.ConsoleColor.DarkYellow, "ChangeEquipIfExistsOtherwiseDefault - Done");
         }
 
         public static void ChangeEquipVariant(Slot slot, PartVariant variant)

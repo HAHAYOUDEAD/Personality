@@ -8,8 +8,10 @@ using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
 using System.Linq;
+using Il2CppTLD;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+namespace Personality
 {
     public class CCMain : MelonMod
     {
@@ -32,6 +34,7 @@ namespace CharacterCustomizer
         public static bool assetLoadComplete;
         public static bool allLoadCompleteAstrid;
         public static bool allLoadCompleteWill;
+        private static bool alreadyStarted;
 
         public static bool needUpdate;
 
@@ -62,15 +65,16 @@ namespace CharacterCustomizer
 
         public override void OnSceneWasLoaded(int level, string name)
         {
-            if (Utility.IsNonGameScene()) CCSetup.currentCharacter = Character.Undefined; 
+            if (!Utility.IsScenePlayable(name)) CCSetup.currentCharacter = Character.Undefined; 
         }
 
         public override void OnSceneWasUnloaded(int level, string name) // started loading scene
         {
-            if (!Utility.IsNonGameScene() && startLoading)
+            if (Utility.IsScenePlayable(name) && startLoading)
             {
-                Utility.Log(ConsoleColor.DarkCyan, "Disabling update checks");
+                Utility.Log(System.ConsoleColor.DarkCyan, "Disabling update checks");
                 startLoading = false;
+                //alreadyStarted = false;
             }
         }
 
@@ -79,16 +83,18 @@ namespace CharacterCustomizer
         {
             public static void Postfix()
             {
-                Utility.Log(ConsoleColor.Yellow, "PlayerManager.Deserialize");
-                if (Utility.IsNonGameScene()) return;
+                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start");
+                if (!Utility.IsScenePlayable()) return;
+                //if (alreadyStarted) return;
+                //if (SceneNameMapping.IsChildOfAnother(GameManager.m_ActiveScene)) return;
+                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start - do");
                 startLoading = true;
                 needUpdate = true;
+                //alreadyStarted = true;
 
-                if (GameManager.GetPlayerManagerComponent().m_VoicePersona == VoicePersona.Female) Settings.options.selectedCharacter = 0;
-                if (GameManager.GetPlayerManagerComponent().m_VoicePersona == VoicePersona.Male) Settings.options.selectedCharacter = 1;
-
-
-
+                if (PlayerManager.m_VoicePersona == VoicePersona.Female) Settings.options.selectedCharacter = 0;
+                if (PlayerManager.m_VoicePersona == VoicePersona.Male) Settings.options.selectedCharacter = 1;
+                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start - done");
             }
         }
 
@@ -138,7 +144,7 @@ namespace CharacterCustomizer
 
         public override void OnUpdate()
         {
-
+            /*
             if (InputManager.GetKeyDown(InputManager.m_CurrentContext, KeyCode.Y))
             {
                 bool indoor = GameManager.GetWeatherComponent().IsIndoorEnvironment();
@@ -147,6 +153,7 @@ namespace CharacterCustomizer
                 HUDMessage.AddMessage("Indoors: " + indoor + " | Injured: " + injured, true, true);
 
             }
+            */
 
         }
 
@@ -157,24 +164,26 @@ namespace CharacterCustomizer
             {
                 if (!startLoading) return;
 
-                if (GameManager.GetPlayerManagerComponent().m_VoicePersona == VoicePersona.Female && CCSetup.currentCharacter != Character.Astrid)
+                
+
+                if (PlayerManager.m_VoicePersona == VoicePersona.Female && CCSetup.currentCharacter != Character.Astrid)
                 {
                     InitializeHands();
                     allLoadCompleteAstrid = false;
                     CCSetup.currentCharacter = Character.Astrid;
                     //characterForceChanged = true;
                     vanillaFemaleHandsMesh = new GameObject[] { };
-                    if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkCyan, $"F - character updated to {CCSetup.currentCharacter}");
+                    if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkCyan, $"F - character updated to {CCSetup.currentCharacter}");
                 }
 
-                if (GameManager.GetPlayerManagerComponent().m_VoicePersona == VoicePersona.Male && CCSetup.currentCharacter != Character.Will)
+                if (PlayerManager.m_VoicePersona == VoicePersona.Male && CCSetup.currentCharacter != Character.Will)
                 {
                     InitializeHands();
                     allLoadCompleteWill = false;
                     CCSetup.currentCharacter = Character.Will;
                     //characterForceChanged = true;
                     vanillaMaleHandsMesh = new GameObject[] { };
-                    if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkCyan, $"M - character updated to {CCSetup.currentCharacter}");
+                    if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkCyan, $"M - character updated to {CCSetup.currentCharacter}");
                 }
 
 
@@ -182,7 +191,7 @@ namespace CharacterCustomizer
                 {
                     if (vanillaFemaleHandsMesh.Length == 0) // load vanilla hands before doing anything else
                     {
-                        if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"F - Vanilla hands not loaded yet, loading, character: {CCSetup.currentCharacter}");
+                        if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"F - Vanilla hands not loaded yet, loading, character: {CCSetup.currentCharacter}");
                         CCSetup.DoEverything(CCSetup.currentCharacter, 0, 1);
 
                     }
@@ -190,14 +199,14 @@ namespace CharacterCustomizer
                     {
                         if (!allLoadCompleteAstrid) // initial load, also if quit to menu
                         {
-                            if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"F - Vanilla hands loaded, doing everything else, character: {CCSetup.currentCharacter}");
+                            if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"F - Vanilla hands loaded, doing everything else, character: {CCSetup.currentCharacter}");
                             CCSetup.DoEverything(CCSetup.currentCharacter, 5);
                             needUpdate = false;
                             return;
                         }
                         else if (needUpdate) // character change during gameplay via console
                         {
-                            if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"F - Most operations already done, reloading only custom meshes, character: {CCSetup.currentCharacter}");
+                            if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"F - Most operations already done, reloading only custom meshes, character: {CCSetup.currentCharacter}");
                             CCSetup.DoEverything(CCSetup.currentCharacter, 3);
                             needUpdate = false;
                             return;
@@ -210,7 +219,7 @@ namespace CharacterCustomizer
                 {
                     if (vanillaMaleHandsMesh.Length == 0)
                     {
-                        if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"M - Vanilla hands not loaded yet, loading, character: {CCSetup.currentCharacter}");
+                        if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"M - Vanilla hands not loaded yet, loading, character: {CCSetup.currentCharacter}");
                         CCSetup.DoEverything(CCSetup.currentCharacter, 0, 1);
 
                     }
@@ -218,14 +227,14 @@ namespace CharacterCustomizer
                     {
                         if (!allLoadCompleteWill)
                         {
-                            if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"M - Vanilla hands loaded, doing everything else, character: {CCSetup.currentCharacter}");
+                            if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"M - Vanilla hands loaded, doing everything else, character: {CCSetup.currentCharacter}");
                             CCSetup.DoEverything(CCSetup.currentCharacter, 5);
                             needUpdate = false;
                             return;
                         }
                         else if (needUpdate)
                         {
-                            if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkGreen, $"M - Most operations already done, reloading only custom meshes, character: {CCSetup.currentCharacter}");
+                            if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"M - Most operations already done, reloading only custom meshes, character: {CCSetup.currentCharacter}");
                             CCSetup.DoEverything(CCSetup.currentCharacter, 3);
                             needUpdate = false;
                             return;

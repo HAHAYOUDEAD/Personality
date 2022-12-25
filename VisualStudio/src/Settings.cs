@@ -1,7 +1,9 @@
 ﻿using ModSettings;
 using System.Reflection;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+
+namespace Personality
 {
     internal static class Settings
     {
@@ -10,7 +12,7 @@ namespace CharacterCustomizer
         public static void OnLoad()
         {
             options = new CCSettings();
-            options.AddToModSettings("Survivor Customizer Settings");
+            options.AddToModSettings("Survivor Customizer Settings", MenuType.InGameOnly);
         }
 
         internal static void SetKeySettingsVisible(bool visible)
@@ -116,13 +118,13 @@ namespace CharacterCustomizer
             switch (Settings.options.selectedCharacter)
             {
                 case 0: // Astrid
-                    InterfaceManager.m_Panel_OptionsMenu.m_State.m_VoicePersona = VoicePersona.Female;
-                    GameManager.GetPlayerManagerComponent().m_VoicePersona = VoicePersona.Female;
+                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Female;
+                    PlayerManager.m_VoicePersona = VoicePersona.Female;
                     GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
                     break;
                 case 1: // Will
-                    InterfaceManager.m_Panel_OptionsMenu.m_State.m_VoicePersona = VoicePersona.Male;
-                    GameManager.GetPlayerManagerComponent().m_VoicePersona = VoicePersona.Male;
+                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Male;
+                    PlayerManager.m_VoicePersona = VoicePersona.Male;
                     GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
                     break;
 

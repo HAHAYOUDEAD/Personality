@@ -6,10 +6,10 @@ using UnityEngine.UI;
 using Il2CppSystem.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-
 using System.Linq;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+namespace Personality
 {
     public class CCSetup : MelonMod
     {
@@ -48,7 +48,7 @@ namespace CharacterCustomizer
 
         public static void HideVanillaHands(Character character, bool hideVanillaHands)
         {
-            Utility.Log(ConsoleColor.Gray, "HideVanillaHands - Start");
+            Utility.Log(System.ConsoleColor.Gray, "HideVanillaHands - Start");
 
             GameObject[] vanillaHands = GetVanillaHandsObject(character);
 
@@ -59,19 +59,19 @@ namespace CharacterCustomizer
                 go.active = !hideVanillaHands;
             }
 
-            Utility.Log(ConsoleColor.DarkYellow, "HideVanillaHands - Done");
+            Utility.Log(System.ConsoleColor.DarkYellow, "HideVanillaHands - Done");
         }
 
         // custom mesh operations
         public static GameObject SetupCustomMesh(GameObject go, Character character, bool stealBones = true, bool useCustomBones = false)
         {
-            Utility.Log(ConsoleColor.Gray, "SetupCustomMesh - Start");
+            Utility.Log(System.ConsoleColor.Gray, "SetupCustomMesh - Start");
             GameObject tempGo;
             GameObject vanillaHands = GetVanillaHandsObject(character)?[0];
 
             if (!vanillaHands)
             {
-                Utility.Log(ConsoleColor.Yellow, "SetupCustomMesh - Couldn't grab vanilla hands");
+                Utility.Log(System.ConsoleColor.Yellow, "SetupCustomMesh - Couldn't grab vanilla hands");
                 return go;
             }
 
@@ -113,13 +113,13 @@ namespace CharacterCustomizer
                 tempGo.GetComponent<SkinnedMeshRenderer>().bones = customBones;
             }
 
-            Utility.Log(ConsoleColor.DarkYellow, "SetupCustomMesh - Done");
+            Utility.Log(System.ConsoleColor.DarkYellow, "SetupCustomMesh - Done");
             return tempGo;
         }
 
         public static void RemovePhysicsBones()
         {
-            Utility.Log(ConsoleColor.Gray, "RemovePhysicsBones - Start");
+            Utility.Log(System.ConsoleColor.Gray, "RemovePhysicsBones - Start");
 
             foreach (KeyValuePair<string, GameObject> entry in currentCustomBones)
             {
@@ -129,12 +129,12 @@ namespace CharacterCustomizer
                 }
             }
             currentCustomBones = new Dictionary<string, GameObject>();
-            Utility.Log(ConsoleColor.DarkYellow, "RemovePhysicsBones - Done");
+            Utility.Log(System.ConsoleColor.DarkYellow, "RemovePhysicsBones - Done");
         }
 
         public static void SetupPhysicsBones(GameObject container, bool setupRigidBody = true)
         {
-            Utility.Log(ConsoleColor.Gray, "SetupPhysicsBones - Start");
+            Utility.Log(System.ConsoleColor.Gray, "SetupPhysicsBones - Start");
 
             foreach (GameObject dummyBone in container.GetAllImmediateChildren()) // DummyBone_*
             {
@@ -170,7 +170,7 @@ namespace CharacterCustomizer
                 }
             }
 
-            Utility.Log(ConsoleColor.DarkYellow, "SetupPhysicsBones - Done");
+            Utility.Log(System.ConsoleColor.DarkYellow, "SetupPhysicsBones - Done");
         }
 
         // texture operations
@@ -206,13 +206,13 @@ namespace CharacterCustomizer
                 }
                 catch (Exception)
                 {
-                    Utility.Log(ConsoleColor.DarkGray, $"ApplyCustomTextures - could not find {n} texture, skipping");
+                    Utility.Log(System.ConsoleColor.DarkGray, $"ApplyCustomTextures - could not find {n} texture, skipping");
                     continue;
                 }
                 if (file != null)
                 {
                     ImageConversion.LoadImage(tex, file);
-                    Utility.Log(ConsoleColor.DarkCyan, $"ApplyCustomTextures - loaded custom texture: {n}");
+                    Utility.Log(System.ConsoleColor.DarkCyan, $"ApplyCustomTextures - loaded custom texture: {n}");
                     tempTextures.Add(tex);
                 }
             }
@@ -247,7 +247,7 @@ namespace CharacterCustomizer
             if (equip.undermaskVariant) equip.undermaskVariant.GetComponent<SkinnedMeshRenderer>().material.color = color;
             if (equip.injuredVariant) equip.injuredVariant.GetComponent<SkinnedMeshRenderer>().material.color = color;
 
-            Utility.Log(ConsoleColor.Cyan, "TintTexture - Done. Changed texture to " + color.ToString());
+            Utility.Log(System.ConsoleColor.Cyan, "TintTexture - Done. Changed texture to " + color.ToString());
         }
 
         // custom mesh variants management
@@ -324,7 +324,7 @@ namespace CharacterCustomizer
 
         public static void SmartUpdateOutfit()
         {
-            Utility.Log(ConsoleColor.Gray, "UpdateVisibility - Start");
+            Utility.Log(System.ConsoleColor.Gray, "UpdateVisibility - Start");
 
             // toggle trinkets
             Equipment.ToggleTrinkets(Settings.options.enableTrinkets);
@@ -335,7 +335,7 @@ namespace CharacterCustomizer
                 currentMeshSet = Outfit.Custom;
                 AutoSwitchMeshVariant();
                 
-                Utility.Log(ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
+                Utility.Log(System.ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
                 return;
             }
 
@@ -385,7 +385,7 @@ namespace CharacterCustomizer
             
 
 
-            Utility.Log(ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
+            Utility.Log(System.ConsoleColor.DarkYellow, $"UpdateVisibility - Done for {currentMeshSet} outfit");
         }
 
         public static void UpdateClothingSlots()
@@ -415,10 +415,10 @@ namespace CharacterCustomizer
             {
                 if (GetVanillaHandsObject(character).Length == 0)
                 {
-                    Utility.Log(ConsoleColor.Red, "Couldn't load vanilla arms, returning");
+                    Utility.Log(System.ConsoleColor.Red, "Couldn't load vanilla arms, returning");
                     return;
                 }
-                else Utility.Log(ConsoleColor.DarkCyan, $"1 - Vanilla arms mesh is loaded, character: {character}");
+                else Utility.Log(System.ConsoleColor.DarkCyan, $"1 - Vanilla arms mesh is loaded, character: {character}");
 
                 if (specificArg == 1) return;
             }
@@ -470,7 +470,7 @@ namespace CharacterCustomizer
                     UpdateClothingSlots();
                 }
 
-                Utility.Log(ConsoleColor.DarkCyan, $"2 - Stole bone components to activate custom mesh rigs, character:{character}");
+                Utility.Log(System.ConsoleColor.DarkCyan, $"2 - Stole bone components to activate custom mesh rigs, character:{character}");
 
                 if (specificArg == 2) return;
             }
@@ -483,7 +483,7 @@ namespace CharacterCustomizer
                 {
                     MelonCoroutines.Start(ApplyCustomTextures(character));
 
-                    Utility.Log(ConsoleColor.DarkCyan, $"3 - Replaced textures with custom ones, character:{character}");
+                    Utility.Log(System.ConsoleColor.DarkCyan, $"3 - Replaced textures with custom ones, character:{character}");
                 }
                 else
                 {
@@ -504,7 +504,7 @@ namespace CharacterCustomizer
                         }
                     }
 
-                    Utility.Log(ConsoleColor.DarkCyan, $"3 - Reloaded textures from prefabs, character:{character}");
+                    Utility.Log(System.ConsoleColor.DarkCyan, $"3 - Reloaded textures from prefabs, character:{character}");
                 }
 
                 if (Settings.options.useTextureTint)
@@ -529,7 +529,7 @@ namespace CharacterCustomizer
                 CCMain.vanillaMaleHandsMesh.GetComponent<SkinnedMeshRenderer>().sharedMaterial.mainTexture = texM;
 
     */
-                Utility.Log(ConsoleColor.DarkCyan, "4 - Does nothing for now");
+                Utility.Log(System.ConsoleColor.DarkCyan, "4 - Does nothing for now");
                 
 
                 if (specificArg == 4) return;
@@ -582,12 +582,12 @@ namespace CharacterCustomizer
                 dollMFeet.GetComponent<UITexture>().mainTexture = feetTex2;
                 dollMBody.GetComponent<UITexture>().mainTexture = bodyTex2;
 
-                Utility.Log(ConsoleColor.DarkCyan, "5 - Applied custom PAPERDOLL textures");
+                Utility.Log(System.ConsoleColor.DarkCyan, "5 - Applied custom PAPERDOLL textures");
 
                 if (specificArg == 5) return;
             }
 
-            Utility.Log(ConsoleColor.DarkCyan, $"All operations complete, shutting down. Character: {character}");
+            Utility.Log(System.ConsoleColor.DarkCyan, $"All operations complete, shutting down. Character: {character}");
             if (character == Character.Astrid) CCMain.allLoadCompleteAstrid = true;
             if (character == Character.Will) CCMain.allLoadCompleteWill = true;
 

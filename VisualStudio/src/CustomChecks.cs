@@ -8,8 +8,9 @@ using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
 using System.Linq;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+namespace Personality
 {
 
     public class CCChecks : MelonMod
@@ -52,7 +53,7 @@ namespace CharacterCustomizer
         {
             string itemNameStripped = item?.name.Replace("GEAR_", "");
 
-            Utility.Log(ConsoleColor.DarkGray, $"CheckForChangeLayer - checking for change in {slot} for {itemNameStripped}");
+            Utility.Log(System.ConsoleColor.DarkGray, $"CheckForChangeLayer - checking for change in {slot} for {itemNameStripped}");
 
             if (item)
             {
@@ -62,20 +63,20 @@ namespace CharacterCustomizer
                 {
                     Equipment.ChangeEquipIfExistsOtherwiseDefault(slot, clothingSet);
                     Equipment.ChangeEquipVariant(slot, PartVariant.Normal);
-                    Utility.Log(ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be changed to {clothingSet}");
+                    Utility.Log(System.ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be changed to {clothingSet}");
                     return true;
                 }
 
                 else if (Equipment.currentEquipment[slot] != null && Equipment.currentEquipment[slot].currentVariantEnum == PartVariant.Disabled) // if clothingset is the same, but should be enabled
                 {
                     Equipment.ChangeEquipVariant(slot, PartVariant.Normal);
-                    Utility.Log(ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be enabled");
+                    Utility.Log(System.ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be enabled");
                     return true;
                 }
             }
             if (!item && Equipment.currentEquipment[slot] != null && Equipment.currentEquipment[slot].currentVariantEnum != PartVariant.Disabled)
             {
-                Utility.Log(ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be disabled");
+                Utility.Log(System.ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be disabled");
                 Equipment.ChangeEquipVariant(slot, PartVariant.Disabled);
                 return true;
             }
@@ -95,7 +96,7 @@ namespace CharacterCustomizer
 
                 if (!__result && CCSetup.currentMeshSet != Outfit.Outdoors) // outdoors
                 {
-                    Utility.Log(ConsoleColor.DarkGreen, "Outdoors check");
+                    Utility.Log(System.ConsoleColor.DarkGreen, "Outdoors check");
                     CCChecks.currentlyIndoors = false;
                     CCSetup.SmartUpdateOutfit();
                     
@@ -104,7 +105,7 @@ namespace CharacterCustomizer
 
                 if (__result && CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.Injured) // indoors
                 {
-                    Utility.Log(ConsoleColor.DarkGreen, "Indoors check");
+                    Utility.Log(System.ConsoleColor.DarkGreen, "Indoors check");
                     CCChecks.currentlyIndoors = true;
                     CCSetup.SmartUpdateOutfit();
                     
@@ -112,9 +113,6 @@ namespace CharacterCustomizer
                 }
             }
         }
-
-
-        
 
 
         [HarmonyPatch(typeof(SprainPain), "HasSprainPain")]
@@ -130,7 +128,7 @@ namespace CharacterCustomizer
 
                 if (__result && CCSetup.currentMeshSet != Outfit.Injured)
                 {
-                    Utility.Log(ConsoleColor.DarkGreen, "Injured check");
+                    Utility.Log(System.ConsoleColor.DarkGreen, "Injured check");
                     CCChecks.currentlyInjured = true;
                     CCSetup.SmartUpdateOutfit();
 
@@ -139,7 +137,7 @@ namespace CharacterCustomizer
 
                 if (!__result && CCSetup.currentMeshSet != Outfit.Indoors) 
                 {
-                    Utility.Log(ConsoleColor.DarkGreen, "Not-injured check");
+                    Utility.Log(System.ConsoleColor.DarkGreen, "Not-injured check");
                     CCChecks.currentlyInjured = false;
                     CCSetup.SmartUpdateOutfit();
 
@@ -148,37 +146,12 @@ namespace CharacterCustomizer
 
                 if (__result && CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.Injured) // indoors
                 {
-                    Utility.Log(ConsoleColor.DarkGreen, "Indoors check");
+                    Utility.Log(System.ConsoleColor.DarkGreen, "Indoors check");
                     CCChecks.currentlyIndoors = true;
                     CCSetup.SmartUpdateOutfit();
 
                     return;
                 }
-            }
-        }
-
-        public static void CheckInjured()
-        {
-            if (CCMain.allLoadCompleteAstrid || CCMain.allLoadCompleteWill)
-            {
-                if (!Settings.options.dynamicOutfit) return;
-
-                if (!currentlyInjured && IsInjured())
-                {
-                    currentlyInjured = true;
-                    CCSetup.SmartUpdateOutfit();
-                    if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkRed, "Injured check");
-                    return;
-                }
-
-                if (currentlyInjured && !IsInjured())
-                {
-                    currentlyInjured = false;
-                    CCSetup.SmartUpdateOutfit();
-                    if (Settings.options.debugLog) MelonLogger.Msg(ConsoleColor.DarkRed, "Not injured check");
-                    return;
-                }
-
             }
         }
 

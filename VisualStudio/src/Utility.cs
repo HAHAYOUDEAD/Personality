@@ -6,8 +6,9 @@ using UnityEngine.UI;
 using Il2CppSystem.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using Il2Cpp;
 
-namespace CharacterCustomizer
+namespace Personality
 {
     public enum Character
     {
@@ -87,9 +88,14 @@ namespace CharacterCustomizer
             }
         }
 
-        public static bool IsNonGameScene()
+        public static bool IsScenePlayable()
         {
-            return string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene == "MainMenu" || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty";
+            return !(string.IsNullOrEmpty(GameManager.m_ActiveScene) || GameManager.m_ActiveScene.Contains("MainMenu") || GameManager.m_ActiveScene == "Boot" || GameManager.m_ActiveScene == "Empty");
+        }
+
+        public static bool IsScenePlayable(string scene)
+        {
+            return !(string.IsNullOrEmpty(scene) || scene.Contains("MainMenu") || scene == "Boot" || scene == "Empty");
         }
 
         public static T GetCopyOf<T>(this Component comp, T other) where T : Component
