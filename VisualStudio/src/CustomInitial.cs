@@ -347,6 +347,8 @@ namespace Personality
                     PlayerManager.m_VoicePersona = VoicePersona.Male;
                 }
 
+                needVariableUpdate = true;
+
                 GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
 
 

@@ -198,6 +198,7 @@ namespace Personality
                             //bone.GetComponent<Joint>().autoConfigureConnectedAnchor = false;
                         }
                         */
+                        
 
                         foreach (Rigidbody rb in customBone.GetComponentsInChildren<Rigidbody>())
                         {
@@ -214,6 +215,7 @@ namespace Personality
                         {
                             //MelonLogger.Msg(childBone.name);
                             currentCustomBones[childBone.name] = childBone.gameObject;
+                            childBone.gameObject.layer = vp_Layer.NoCollidePlayer;
                         }
 
                         //customBone.layer = 15; // NoCollidePlayer
@@ -496,6 +498,8 @@ namespace Personality
                     {
                         largeGloves = true;
 
+
+
                         if (jacket.currentVariantEnum == visible)
                         {
                             if (gloves.specialFlag == SpecialFlag.LargeGloves || jacket.specialFlag != SpecialFlag.LargeJacket) // no masking if rabbitskin mitts and large jacket
@@ -509,6 +513,7 @@ namespace Personality
                             
                             if (shirt.currentVariantEnum != disabled) finalShirt = disabled;
                         }
+
                     }
                     else
                     {
@@ -581,6 +586,14 @@ namespace Personality
                     if (isInjured)
                     {
                         Equipment.ToggleBandages(false, true);
+
+                        if (gloves.specialFlag == SpecialFlag.LargeMittens && 
+                            currentCharacter == Character.Will &&
+                            jacket.currentVariantEnum == disabled &&
+                            isInjured) // show bandage for will under large mitts when no jacket
+                        {
+                            Equipment.ToggleBandages(true);
+                        }
                     }
 
 
@@ -935,6 +948,36 @@ namespace Personality
                     foreach (Equip equip in equips.Values)
                     {
                         if (equip == null) continue;
+
+                        Texture? tex = equip.normalVariantPrefab?.GetComponent<SkinnedMeshRenderer>()?.material.mainTexture;
+
+
+                        if (tex != null)
+                        {
+                            if (equip.normalVariant)
+                            {
+                                foreach (GameObject child in equip.normalVariant.GetAllImmediateChildren())
+                                {
+                                    if (child.GetComponent<SkinnedMeshRenderer>()) child.GetComponent<SkinnedMeshRenderer>().sharedMaterial.mainTexture = tex;
+                                }
+                            }
+                            if (equip.maskedVariant)
+                            {
+                                foreach (GameObject child in equip.maskedVariant.GetAllImmediateChildren())
+                                {
+                                    if (child.GetComponent<SkinnedMeshRenderer>()) child.GetComponent<SkinnedMeshRenderer>().sharedMaterial.mainTexture = tex;
+                                }
+                            }
+                            if (equip.injuredVariant)
+                            {
+                                foreach (GameObject child in equip.injuredVariant.GetAllImmediateChildren())
+                                {
+                                    if (child.GetComponent<SkinnedMeshRenderer>()) child.GetComponent<SkinnedMeshRenderer>().sharedMaterial.mainTexture = tex;
+                                }
+                            }
+                        }
+
+                        /*
                         Texture tex = equip.normalVariantPrefab?.GetComponent<SkinnedMeshRenderer>().material.mainTexture;
 
                         if (tex)
@@ -943,6 +986,7 @@ namespace Personality
                             if (equip.maskedVariant) equip.maskedVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
                             if (equip.injuredVariant) equip.injuredVariant.GetComponent<SkinnedMeshRenderer>().material.mainTexture = tex;
                         }
+                        */
                     }
 
                     Utility.Log(System.ConsoleColor.DarkCyan, $"3 - Reloaded textures from prefabs, character:{character}");
