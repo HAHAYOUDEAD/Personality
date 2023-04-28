@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 330745804
+CRC: 3843032686
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -7,4 +7,13 @@ AssetBundleManifest:
       Dependencies: {}
     Info_1:
       Name: bundleastrid
+      Dependencies: {}
+    Info_2:
+      Name: pack_handmade
+      Dependencies: {}
+    Info_3:
+      Name: customphysics
+      Dependencies: {}
+    Info_4:
+      Name: trinkets
       Dependencies: {}

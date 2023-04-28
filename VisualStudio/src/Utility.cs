@@ -26,7 +26,8 @@ namespace Personality
         Arms,
         Shirt,
         Jacket,
-        Trinkets
+        Trinkets,
+        Bandages
     }
 
     public enum PartVariant
@@ -34,8 +35,8 @@ namespace Personality
         Undefined,
         Disabled,
         Normal,
-        Undermask,
-        Injured
+        Masked,
+        Injured 
     }
 
     public enum Outfit
@@ -44,17 +45,28 @@ namespace Personality
         Undressed,
         Indoors,
         Outdoors,
-        Injured,
-        Custom
+        InjuredIndoors,
+        InjuredOutdoors
     }
 
     public enum SpecialFlag
     {
         None,
-        Mittens,
-        SleevelessJacket,
         LargeGloves,
+        Mittens,
+        LargeMittens,
+        SleevelessJacket, //can only be worn in inner slot
+        LargeJacket,
         Teeshirt
+    }
+
+    public enum MittenVariant
+    {
+        Undefined,
+        BothOn,
+        BothOff,
+        RightOff,
+        LeftOff
     }
 
     public enum Environment
@@ -97,6 +109,11 @@ namespace Personality
         {
             return !(string.IsNullOrEmpty(scene) || scene.Contains("MainMenu") || scene == "Boot" || scene == "Empty");
         }
+        public static bool IsMainMenu(string scene)
+        {
+            return !string.IsNullOrEmpty(scene) && scene.Contains("MainMenu");
+        }
+
 
         public static T GetCopyOf<T>(this Component comp, T other) where T : Component
         {

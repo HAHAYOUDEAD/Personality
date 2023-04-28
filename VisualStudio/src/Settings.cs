@@ -1,6 +1,7 @@
 ﻿using ModSettings;
 using System.Reflection;
 using Il2Cpp;
+using MelonLoader;
 
 
 namespace Personality
@@ -12,15 +13,27 @@ namespace Personality
         public static void OnLoad()
         {
             options = new CCSettings();
-            options.AddToModSettings("Survivor Customizer Settings", MenuType.InGameOnly);
+            options.AddToModSettings("Personality", MenuType.InGameOnly);
+            ExpandTextureColoring(options.useTextureTint);
+            ExpandMeshCustomization(options.displayProperClothes);
         }
 
-        internal static void SetKeySettingsVisible(bool visible)
+        internal static void ExpandTextureColoring(bool visible)
         {
             options.SetFieldVisible(nameof(options.skinTextureHue), visible);
             options.SetFieldVisible(nameof(options.skinTextureSat), visible);
             options.SetFieldVisible(nameof(options.skinTextureLum), visible);
         }
+
+        internal static void ExpandMeshCustomization(bool visible)
+        {
+            options.SetFieldVisible(nameof(options.mittensAppearance), visible);
+
+            //options.SetFieldVisible(nameof(options.dynamicOutfit), !visible);
+            options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
+        }
+
+        
     }
 
     internal class CCSettings : JsonModSettings
@@ -35,15 +48,33 @@ namespace Personality
             "Will"
         })]
         public int selectedCharacter;
-
+        /*
+        [Name("Left-handed")]
+        [Description("Make your character left-handed. \n\nDefault: false")]
+        public bool leftHanded = false;
+        */
         [Name("Dynamic outfit")]
         [Description("Automatically switch between outdoors/indoors/injured outfits. \n\nOnly changes when arms are hidden to preserve immersion. \n\nDefault: true")]
         public bool dynamicOutfit = true;
-        /*
-        [Name("Show injures")]
-        [Description("Show bandages when injured. Only visible on indoors clothes \n\nDefault: true")]
-        public bool showInjuries = true;
-        */
+
+        [Name("Display current clothes")]
+        [Description("This is very much incomplete, only a small part of clothes are covered. If piece of clothing you're wearing is not implemented yet - it will default to classic charachter outfit. \n\nDefault: true")]
+        public bool displayProperClothes = true;
+
+        [Name("Mittens")]
+        [Description("How do you like your mittens(and large gloves)?\n\n" +
+            "Always on - don't take off mittens. May look wack in some situations\n\n" +
+            "Dynamic - take one mitten off when need free hand\n\n" +
+            "Dynamic and fun - dangle from a string when need free hand. Works when you have a jacket on, otherwise same as Dynamic\n\n" +
+            "Default: Dynamic and fun")]
+        [Choice(new string[]
+        {
+            "Always on",
+            "Dynamic",
+            "Dynamic and fun"
+        })]
+        public int mittensAppearance = 2;
+
         [Name("Default outfit")]
         [Description("How your character looks by default. Has no effect if Dynamic outfit is on. \n\nDefault: Vanilla")]
         [Choice(new string[]
@@ -55,6 +86,9 @@ namespace Personality
         })]
         public int defaultAppearance;
 
+        [Name("Enable trinkets")]
+        [Description("Show trinkets on character's hands. \n\nDefault: false")]
+        public bool enableTrinkets = false;
 
         [Section("Texture customization")]
 
@@ -81,28 +115,58 @@ namespace Personality
         [Slider(10, 100)]
         public int skinTextureLum = 100;
 
+        [Name("Reload textures")]
+        [Description("Tick this to reload textures from files")]
+        public bool reloadTextures = false;
+
         [Section("Debug/incomplete stuff")]
 
         [Name("Enable debug messages")]
         [Description("To help developer find the issue")]
         public bool debugLog = false;
 
-        [Name("Display current clothes")]
-        [Description("(this is just a proof of concept, I didn't make any clothing meshes and don't have plans for it yet)\n\nOverrides automatic outfit switch")]
-        public bool displayProperClothes = false;
-
-        [Name("Enable trinkets")]
-        [Description("Add some custom trinkets to your character.(does nothing at the moment) \n\nDefault: false")]
-        public bool enableTrinkets = false;
 
         protected override void OnChange(FieldInfo field, object oldValue, object newValue)
         {
-            if (field.Name == nameof(useTextureTint)) Settings.SetKeySettingsVisible((bool)newValue);
+            if (field.Name == nameof(useTextureTint)) Settings.ExpandTextureColoring((bool)newValue);
+            if (field.Name == nameof(displayProperClothes)) Settings.ExpandMeshCustomization((bool)newValue);
         }
 
         protected override void OnConfirm()
         {
-            CCSetup.DoEverything(CCSetup.currentCharacter, 0, 3);
+
+            switch (Settings.options.selectedCharacter)
+            {
+                case 0: // Astrid
+                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Female;
+                    if (CCSetup.currentCharacter != Character.Astrid)
+                    {
+                        PlayerManager.m_VoicePersona = VoicePersona.Female;
+                        GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
+                        if (CCMain.mainCoroutine != null) MelonCoroutines.Stop(CCMain.mainCoroutine);
+                        CCMain.mainCoroutine = MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 5));
+                    }
+                    break;
+                case 1: // Will
+                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Male;
+                    if (CCSetup.currentCharacter != Character.Will)
+                    {
+                        PlayerManager.m_VoicePersona = VoicePersona.Male;
+                        GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
+                        if (CCMain.mainCoroutine != null) MelonCoroutines.Stop(CCMain.mainCoroutine);
+                        CCMain.mainCoroutine = MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 5));
+                    }
+
+                    break;
+            }
+
+            if (Settings.options.reloadTextures)
+            {
+                MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 0, 3));
+                MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 0, 5));
+                Settings.options.reloadTextures = false;
+            }
+
 
             if (Settings.options.useTextureTint)
             {
@@ -115,20 +179,7 @@ namespace Personality
                 CCSetup.TintTexture(Slot.Arms, 0, 0, 100);
             }
 
-            switch (Settings.options.selectedCharacter)
-            {
-                case 0: // Astrid
-                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Female;
-                    PlayerManager.m_VoicePersona = VoicePersona.Female;
-                    GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
-                    break;
-                case 1: // Will
-                    //InterfaceManager.GetPanel<Panel_OptionsMenu>().m_State.m_VoicePersona = VoicePersona.Male;
-                    PlayerManager.m_VoicePersona = VoicePersona.Male;
-                    GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
-                    break;
-
-            }
+            //CCMain.characterChirality.isLeftHanded = Settings.options.leftHanded;
 
             CCSetup.SmartUpdateOutfit();
 

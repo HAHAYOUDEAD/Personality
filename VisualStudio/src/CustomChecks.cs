@@ -18,8 +18,18 @@ namespace Personality
         public static bool currentlyIndoors;
         public static bool currentlyInjured;
 
-        private static bool skipItemInHandsCheckOnce;
+        //private static bool debugOverrideIndoors;
+        //private static bool debugOverrideInjured;
 
+        public static bool skipItemInHandsCheckForIndoors;
+        public static bool skipItemInHandsCheckForInjured;
+
+        public static bool shouldDoOutfitUpdate;
+
+        //public static void DebugSetInjured(bool set) => debugOverrideInjured = set;
+        //public static void DebugSetIndoors(bool set) => debugOverrideIndoors = set;
+
+        /*
         public static bool IsInjured()
         {
             if (GameManager.GetSprainPainComponent().HasSprainPain())
@@ -34,15 +44,19 @@ namespace Personality
             }
             return false;
         }
+        */
 
         private static bool ShouldCheckForOutfitChange()
         {
+            // skip check when just loaded a level
+            //if (GameManager.GetPlayerManagerComponent().m_ItemInHands && !skipItemInHandsCheckOnce) skipItemInHandsCheckOnce = true;
+            //if (!CCMain.startLoading) skipItemInHandsCheckOnce = false;
 
-            if (!CCMain.startLoading) skipItemInHandsCheckOnce = true;
+            if (!CCMain.characterIsLoaded) return false;
 
-            if (!Settings.options.dynamicOutfit || !GameManager.GetPlayerManagerComponent() || !(CCMain.allLoadCompleteAstrid || CCMain.allLoadCompleteWill)) return false;
+            if (!Settings.options.dynamicOutfit || !GameManager.GetPlayerManagerComponent() || !(CCMain.allLoadCompleteAstrid || CCMain.allLoadCompleteWill)) return false; // || Settings.options.displayProperClothes
 
-            bool noItemInHands = !GameManager.GetPlayerManagerComponent().m_ItemInHands || skipItemInHandsCheckOnce;
+            bool noItemInHands = !GameManager.GetPlayerManagerComponent().m_ItemInHands || skipItemInHandsCheckForInjured || skipItemInHandsCheckForIndoors;
 
             if (!noItemInHands) return false;
 
@@ -55,9 +69,13 @@ namespace Personality
 
             Utility.Log(System.ConsoleColor.DarkGray, $"CheckForChangeLayer - checking for change in {slot} for {itemNameStripped}");
 
+            //Equipment.ActuallyEquipped(slot, item != null);
+
             if (item)
             {
                 string clothingSet = Equipment.CheckSlotShouldBeChanged(slot, itemNameStripped);
+
+                
 
                 if (clothingSet != null)
                 {
@@ -67,19 +85,23 @@ namespace Personality
                     return true;
                 }
 
-                else if (Equipment.currentEquipment[slot] != null && Equipment.currentEquipment[slot].currentVariantEnum == PartVariant.Disabled) // if clothingset is the same, but should be enabled
+                else if (Equipment.currentEquipment[slot] != null && Equipment.currentEquipment[slot].currentVariantEnum != PartVariant.Normal) // if clothingset is the same, but should be enabled
                 {
                     Equipment.ChangeEquipVariant(slot, PartVariant.Normal);
                     Utility.Log(System.ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be enabled");
                     return true;
                 }
+
+                
             }
+
             if (!item && Equipment.currentEquipment[slot] != null && Equipment.currentEquipment[slot].currentVariantEnum != PartVariant.Disabled)
             {
                 Utility.Log(System.ConsoleColor.Gray, $"CheckForChangeLayer - {slot} should be disabled");
                 Equipment.ChangeEquipVariant(slot, PartVariant.Disabled);
                 return true;
             }
+            
             return false;
         }
 
@@ -91,10 +113,9 @@ namespace Personality
             public static void Postfix(ref bool __result)
             {
                 if (!ShouldCheckForOutfitChange()) return;
+                skipItemInHandsCheckForIndoors = false;
 
-                skipItemInHandsCheckOnce = false;
-
-                if (!__result && CCSetup.currentMeshSet != Outfit.Outdoors) // outdoors
+                if (!__result && (CCSetup.currentMeshSet != Outfit.Outdoors && CCSetup.currentMeshSet != Outfit.InjuredOutdoors)) // outdoors
                 {
                     Utility.Log(System.ConsoleColor.DarkGreen, "Outdoors check");
                     CCChecks.currentlyIndoors = false;
@@ -103,12 +124,11 @@ namespace Personality
                     return;
                 }
 
-                if (__result && CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.Injured) // indoors
+                if (__result && (CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.InjuredIndoors)) // indoors
                 {
                     Utility.Log(System.ConsoleColor.DarkGreen, "Indoors check");
                     CCChecks.currentlyIndoors = true;
                     CCSetup.SmartUpdateOutfit();
-                    
                     return;
                 }
             }
@@ -122,28 +142,27 @@ namespace Personality
             {
                 if (!ShouldCheckForOutfitChange()) return;
                 
-                if (CCSetup.currentMeshSet == Outfit.Outdoors) return;
-               
-                skipItemInHandsCheckOnce = false;
+                if (!Settings.options.displayProperClothes && CCSetup.currentMeshSet == Outfit.Outdoors) return;
 
-                if (__result && CCSetup.currentMeshSet != Outfit.Injured)
+                skipItemInHandsCheckForInjured = false;
+
+
+                if (__result && (CCSetup.currentMeshSet != Outfit.InjuredIndoors && CCSetup.currentMeshSet != Outfit.InjuredOutdoors))
                 {
                     Utility.Log(System.ConsoleColor.DarkGreen, "Injured check");
                     CCChecks.currentlyInjured = true;
                     CCSetup.SmartUpdateOutfit();
-
                     return;
                 }
 
-                if (!__result && CCSetup.currentMeshSet != Outfit.Indoors) 
+                if (!__result && (CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.Outdoors)) 
                 {
                     Utility.Log(System.ConsoleColor.DarkGreen, "Not-injured check");
                     CCChecks.currentlyInjured = false;
                     CCSetup.SmartUpdateOutfit();
-
                     return;
                 }
-
+                /*
                 if (__result && CCSetup.currentMeshSet != Outfit.Indoors && CCSetup.currentMeshSet != Outfit.Injured) // indoors
                 {
                     Utility.Log(System.ConsoleColor.DarkGreen, "Indoors check");
@@ -152,6 +171,7 @@ namespace Personality
 
                     return;
                 }
+                */
             }
         }
 
@@ -162,6 +182,8 @@ namespace Personality
 
             public static void Postfix(bool enable, ref Panel_Clothing __instance)
             {
+                if (!Settings.options.displayProperClothes) return;
+
                 if (enable && !__instance.m_ShowPaperDollOnly) visited = true;
 
                 if (!enable && visited)

@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3459736597
+CRC: 1682021962
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ff65056f560dba7044bf17263fcab03a
+    Hash: ca3d9a7c6f5af09dea6670c3d1cad24c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: a379e4aa5a1deb3953ebe95194c81b8f
+    Hash: 90dce8b7c9e3b050b20f9697f69e3282
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,5 +25,5 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/allInOnePrefabAstrid.prefab
+- Assets/allInOnePrefabAstridSplit.prefab
 Dependencies: []

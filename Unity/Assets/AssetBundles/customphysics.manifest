@@ -1,0 +1,27 @@
+ManifestFileVersion: 0
+CRC: 1619710560
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 6fe09d0ef353dd96b4d6b7b74968e659
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c07b2bde11851c4c6df3a32094a72182
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+- Class: 153
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/customPhysics.prefab
+Dependencies: []

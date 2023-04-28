@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 2997317898
+CRC: 2553782512
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 1393ada2e3a1d962b3e7217a0fa92e8c
+    Hash: 7cbb7e8e0ed744fbdc1f8ff64906a53d
   TypeTreeHash:
     serializedVersion: 2
-    Hash: a379e4aa5a1deb3953ebe95194c81b8f
+    Hash: 90dce8b7c9e3b050b20f9697f69e3282
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -25,5 +25,5 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/allInOnePrefabWill.prefab
+- Assets/allInOnePrefabWillSplit.prefab
 Dependencies: []
