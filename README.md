@@ -1,5 +1,8 @@
+# 0.6.0
+Fixed a lot of issues and added first batch of clothing!
+
 # Personality
-Lets you customize your character: replace textures and change outfit
+Lets you customize your character: replace textures and change outfit. [Funny video](https://youtu.be/jm8WjlVVtw8)
 
 https://user-images.githubusercontent.com/46863862/203854709-c9b64ea2-1102-49a4-a711-e809c015e9e4.mp4
 
@@ -20,7 +23,7 @@ Requires [ModSettings](https://github.com/zeobviouslyfakeacc/ModSettings/release
 - Custom trinkets (for example bracelet for Astrid and watch for Will)
 - Dynamic paperdolls (showing injures, fatigue and probably something else)
 - 2 new characters. They are done conceptually, I would need to add the clothes, proper first person models and paperdolls. So it might take a while
-- Framework for adding all the clothes is there, so I MIGHT very gradually add the clothes in form of updates
+- Framework for adding all the clothes is there, so I probably will very gradually add the clothes in form of updates
 
 
 
