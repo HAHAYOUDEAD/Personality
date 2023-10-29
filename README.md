@@ -1,6 +1,6 @@
 # 0.6.5 - Howl-oween update!
 A little special something for the Halloween spirit
-![Poster](Images/PersonalityHalloween2023.png)
+![Poster](Pics/PersonalityHalloween2023.png)
 
 # Personality
 Lets you customize your character: replace textures and change outfit. [Funny video](https://youtu.be/jm8WjlVVtw8)
