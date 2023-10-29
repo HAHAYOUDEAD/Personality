@@ -16,6 +16,7 @@ namespace Personality
             options.AddToModSettings("Personality", MenuType.InGameOnly);
             ExpandTextureColoring(options.useTextureTint);
             ExpandMeshCustomization(options.displayProperClothes);
+            HideEverythingWhenSpecialOverride(options.specialEventOverride);
         }
 
         internal static void ExpandTextureColoring(bool visible)
@@ -33,11 +34,44 @@ namespace Personality
             options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
         }
 
+        internal static void HideEverythingWhenSpecialOverride(bool visible)
+        {
+            options.SetFieldVisible(nameof(options.specialEventOutfit), visible);
+
+            //options.SetFieldVisible(nameof(options.selectedCharacter), !visible);
+            options.SetFieldVisible(nameof(options.dynamicOutfit), !visible);
+            options.SetFieldVisible(nameof(options.displayProperClothes), !visible);
+            options.SetFieldVisible(nameof(options.mittensAppearance), !visible);
+            options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
+            options.SetFieldVisible(nameof(options.enableTrinkets), !visible);
+            options.SetFieldVisible(nameof(options.useCustomTextures), !visible);
+            options.SetFieldVisible(nameof(options.useTextureTint), !visible);
+            options.SetFieldVisible(nameof(options.skinTextureHue), !visible);
+            options.SetFieldVisible(nameof(options.skinTextureSat), !visible);
+            options.SetFieldVisible(nameof(options.skinTextureLum), !visible);
+            options.SetFieldVisible(nameof(options.reloadTextures), !visible);
+
+        }
+
         
     }
 
     internal class CCSettings : JsonModSettings
     {
+        [Section("Specials")]
+        [Name("Enable override")]
+        [Description("Turn on a special outfit override, for thematic events. \n\nDefault: false")]
+        public bool specialEventOverride = false;
+
+        [Name("Special outfit")]
+        [Description("Select the occasion")]
+        [Choice(new string[]
+        {
+            "Halloween 2023",
+            "Placeholder(does nothing)"
+        })]
+        public int specialEventOutfit;
+
         [Section("Mesh customization")]
 
         [Name("Character")]
@@ -119,6 +153,20 @@ namespace Personality
         [Description("Tick this to reload textures from files")]
         public bool reloadTextures = false;
 
+        [Section("Misc settings")]
+
+        [Name("Hands Field of View")]
+        [Description("NOT regular camera FOV, this lets you see more of your character's hands.\n\nNot intended to be changed like this, so some animations might look off")]
+        [Choice(new string[]
+        {
+            "Default",
+            "+10%",
+            "+20%",
+            "+30%",
+            "Quake"
+        })]
+        public int weaponCameraFov;
+
         [Section("Debug/incomplete stuff")]
 
         [Name("Enable debug messages")]
@@ -130,6 +178,11 @@ namespace Personality
         {
             if (field.Name == nameof(useTextureTint)) Settings.ExpandTextureColoring((bool)newValue);
             if (field.Name == nameof(displayProperClothes)) Settings.ExpandMeshCustomization((bool)newValue);
+            if (field.Name == nameof(specialEventOverride))
+            {
+                Settings.HideEverythingWhenSpecialOverride((bool)newValue);
+                base.OnConfirm();
+            }
         }
 
         protected override void OnConfirm()
@@ -180,6 +233,11 @@ namespace Personality
             }
 
             //CCMain.characterChirality.isLeftHanded = Settings.options.leftHanded;
+
+            if (!Settings.options.specialEventOverride)
+            {
+                CCSetup.SetClothesToDefault();
+            }
 
             CCSetup.SmartUpdateOutfit();
 

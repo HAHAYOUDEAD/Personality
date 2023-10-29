@@ -57,7 +57,8 @@ namespace Personality
         LargeMittens,
         SleevelessJacket, //can only be worn in inner slot
         LargeJacket,
-        Teeshirt
+        Teeshirt,
+        FullOverride //for event outfits
     }
 
     public enum MittenVariant
@@ -112,6 +113,12 @@ namespace Personality
         public static bool IsMainMenu(string scene)
         {
             return !string.IsNullOrEmpty(scene) && scene.Contains("MainMenu");
+        }
+
+        public static bool IsAssemblyPresent(string assemblyName)
+        {
+            MelonAssembly assembly = MelonAssembly.LoadedAssemblies.FirstOrDefault(obj => obj.Assembly.GetName().Name.Contains(assemblyName));
+            return (assembly != null);
         }
 
 

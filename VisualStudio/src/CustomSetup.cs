@@ -360,20 +360,53 @@ namespace Personality
             bool isInjured = meshSet == Outfit.InjuredIndoors || meshSet == Outfit.InjuredOutdoors;
             AutoSwitchMeshVariant(isInjured);
         }
-        /*
-        public static void ShareHandsMaterialWithMittens(GameObject go, Character character)
-        {
-            foreach (SkinnedMeshRenderer smr in go.GetComponentsInChildren<SkinnedMeshRenderer>())
-            {
-                if (smr.material.name.Contains("Arms"))
-                {
-                    smr.sharedMaterial = Equipment.allEquipment[character]["Default"]?[Slot.Hands]?.normalVariantPrefab?.GetComponent<SkinnedMeshRenderer>().sharedMaterial;
-                }
-            }
 
-            Utility.Log(System.ConsoleColor.Cyan, "ShareHandsMaterialWithMittens - Done");
+
+        public static void OverrideOutfitForEvent()
+        {
+
+            Equipment.ToggleTrinkets(false);
+            Equipment.ToggleBandages(false);
+
+            switch (Settings.options.specialEventOutfit)
+            {
+
+                case 0: //Halloween 2023
+
+                    Equipment.ChangeEquipIfExistsOtherwiseDefault(Slot.Shirt, "Event-Halloween2023");
+
+                    if (currentCharacter == Character.Astrid)
+                    {
+                        Equipment.ChangeEquipVariant(Slot.Arms, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Normal, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Gloves, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Shirt, PartVariant.Normal);
+                        Equipment.ChangeEquipVariant(Slot.Jacket, PartVariant.Disabled);
+                    }
+
+                    if (currentCharacter == Character.Will)
+                    {
+                        Equipment.ChangeEquipVariant(Slot.Arms, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Gloves, PartVariant.Disabled);
+                        Equipment.ChangeEquipVariant(Slot.Shirt, PartVariant.Normal);
+                        Equipment.ChangeEquipVariant(Slot.Jacket, PartVariant.Disabled);
+                    }
+
+                    if (currentCharacter == Character.Marcene)
+                    {
+
+                    }
+
+                    if (currentCharacter == Character.Lincoln)
+                    {
+
+                    }
+
+                    break;
+            }
         }
-        */
+
         public static void AutoSwitchMeshVariant(bool isInjured = false, bool? asIfMittenIsOff = null) // asIfMittenIsOff true = right, false = left
         {
             PartVariant visible = PartVariant.Normal;
@@ -617,53 +650,8 @@ namespace Personality
             
         }
 
-        /*
-        public static void OneMittenOff(bool right, bool isInjured) // display what's under taken off mitten
-        {
-            PartVariant currentHands = Equipment.currentEquipment[Slot.Hands].currentVariantEnum;
-            PartVariant currentShirt = Equipment.currentEquipment[Slot.Shirt].currentVariantEnum;
-            PartVariant currentJacket = Equipment.currentEquipment[Slot.Jacket].currentVariantEnum;
-
-            if (right)
-            {
-                if (currentJacket == PartVariant.Masked)
-                {
-                    Equipment.ChangeEquipVariant(Slot.Jacket, PartVariant.Masked, PartVariant.Normal);
-                    Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Disabled, PartVariant.Normal);
-                    Equipment.ChangeEquipVariant(Slot.Shirt, PartVariant.Disabled, currentShirt);
-                }
-                else if (currentJacket == PartVariant.Disabled)
-                {
-                    Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Masked, PartVariant.Normal);
-                }
-
-                Equipment.ToggleBandages(false, isInjured);
-            }
-            else
-            {
-                if (currentJacket == PartVariant.Masked)
-                {
-                    Equipment.ChangeEquipVariant(Slot.Jacket, PartVariant.Normal, PartVariant.Masked);
-                    Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Normal, PartVariant.Disabled);
-                    Equipment.ChangeEquipVariant(Slot.Shirt, currentShirt, PartVariant.Disabled);
-                }
-                else if (currentJacket == PartVariant.Disabled)
-                {
-                    Equipment.ChangeEquipVariant(Slot.Hands, PartVariant.Normal, PartVariant.Masked);
-                }
-
-                Equipment.ToggleBandages(isInjured, false);
-            }
-        }
-        */
         public static void SwitchGlovesAppearance(bool dangle, bool isInjured, MittenVariant variant = MittenVariant.BothOn)
         {
-            /*
-            if (variant == MittenVariant.BothOn)
-            {
-                AutoSwitchMeshVariant(isInjured);
-            }
-            */
             if (dangle)
             {
                 if (variant == MittenVariant.RightOff)
@@ -718,9 +706,19 @@ namespace Personality
             }
         }
 
+
+
         public static void SmartUpdateOutfit()
         {
             Utility.Log(System.ConsoleColor.Gray, "UpdateVisibility - Start");
+
+
+            if (Settings.options.specialEventOverride)
+            {
+                OverrideOutfitForEvent();
+                return;
+            }
+
 
             // toggle trinkets
             Equipment.ToggleTrinkets(Settings.options.enableTrinkets);
@@ -831,50 +829,20 @@ namespace Personality
                     Utility.Log(System.ConsoleColor.Gray, "Looking for vanilla hands...");
                     yield return new WaitForEndOfFrame();
                 }
-                /*
-                if (!CCMain.characterChirality) CCMain.characterChirality = CCMain.vanillaCharacter.transform.Find("NEW_FPHand_Rig").gameObject.AddComponent<Chirality>();
-
-                CCMain.characterChirality.isLeftHanded = Settings.options.leftHanded;
-                */
 
                 Utility.Log(System.ConsoleColor.DarkCyan, $"1 - Vanilla arms mesh is loaded, character: {character}");
 
-                //yield return new WaitForEndOfFrame();
                 if (specificArg == 1) yield break;
             }
 
             // 2 transfer bone components from vanilla arms to custom meshes
             if (arg >= 2 || specificArg == 2)
             {
-                /*
-                if (character == Character.Astrid)
-                {
-                    RemovePhysicsBones();
-                    
-                    if (!currentPhysicsObject) currentPhysicsObject = GameObject.Instantiate(CCMain.physicsObjectAstrid);
-
-                    SetupPhysicsBones(currentPhysicsObject); // should be done before SetupCustomMesh
-                    
-                }
-                */
-
-                //RemovePhysicsBones();
-
                 if (!currentPhysicsObject)
                 {
                     currentPhysicsObject = GameObject.Instantiate(CCMain.physicsObject);
                     SetupPhysicsBones(currentPhysicsObject); // should be done before SetupCustomMesh
                 }
-
-                /*
-                foreach (KeyValuePair<string, GameObject> kvp in currentCustomBones)
-                {
-                    MelonLogger.Msg(kvp.Key);
-                    MelonLogger.Msg(kvp.Value);
-                }
-                */
-
-                
 
                 foreach (Dictionary<Slot, Equip> equipDict in Equipment.allEquipment[character].Values)
                 {
@@ -899,19 +867,6 @@ namespace Personality
                         if (equip.normalVariantPrefab && !equip.normalVariant) equip.normalVariant = SetupCustomMesh(equip.normalVariantPrefab, character, true, false);
                         if (equip.maskedVariantPrefab && !equip.maskedVariant) equip.maskedVariant = SetupCustomMesh(equip.maskedVariantPrefab, character, true, false);
                         if (equip.injuredVariantPrefab && !equip.injuredVariant) equip.injuredVariant = SetupCustomMesh(equip.injuredVariantPrefab, character, true, false);
-                        /*
-                        if (equip.slot == Slot.Trinkets)
-                        {
-                            if (equip.normalVariant) equip.normalVariant = SetupCustomMesh(equip.normalVariant, character, true, true);
-                            continue;
-                        }
-                        else
-                        {
-
-                        }
-                        */
-
-
                     }
                 }
 
@@ -919,9 +874,12 @@ namespace Personality
                 SmartUpdateOutfit();
                 HideVanillaHands(character, true);
 
-                if (Settings.options.displayProperClothes)
+                if (!Settings.options.specialEventOverride)
                 {
-                    UpdateClothingSlots();
+                    if (Settings.options.displayProperClothes)
+                    {
+                        UpdateClothingSlots();
+                    }
                 }
 
                 Utility.Log(System.ConsoleColor.DarkCyan, $"2 - Stole bone components to activate custom mesh rigs, character:{character}");

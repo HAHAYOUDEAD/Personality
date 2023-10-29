@@ -10,7 +10,6 @@ using HarmonyLib;
 using System.Linq;
 using Il2CppTLD;
 using Il2Cpp;
-using Unity.VisualScripting;
 
 namespace Personality
 {
@@ -63,6 +62,7 @@ namespace Personality
         public static AssetBundle customArmsBundleWill;
         public static AssetBundle customPhysicsBundle;
         public static AssetBundle customTrinketsBundle;
+        public static AssetBundle customEventsBundle;
 
         public static GameObject physicsObject;
         public static GameObject trinketsObject;
@@ -72,6 +72,7 @@ namespace Personality
         public static Dictionary<string, AssetBundle> clothingBundles = new();
 
         public static readonly string cb_handmade = "pack_handmade";
+        public static readonly string cb_events = "pack_events";
 
         public static Dictionary<string, ClothingInfo> clothingData = new()
         {
@@ -143,9 +144,11 @@ namespace Personality
             customArmsBundleWill = AssetBundle.LoadFromFile(path + "bundlewill");
             customPhysicsBundle = AssetBundle.LoadFromFile(path + "customphysics");
             customTrinketsBundle = AssetBundle.LoadFromFile(path + "trinkets");
+            
 
             path += "clothingBundles/";
             clothingBundles.Add(cb_handmade, AssetBundle.LoadFromFile(path + cb_handmade));
+            customEventsBundle = AssetBundle.LoadFromFile(path + cb_events);
 
 
             // Get Mods folder path
@@ -157,6 +160,18 @@ namespace Personality
 
             // Enable settings
             Settings.OnLoad();
+
+            if (Utility.IsAssemblyPresent("TLDHalloween"))
+            {
+                MelonLogger.Msg(System.ConsoleColor.Blue, "Howl-oween detected! Enabling Personality override!");
+                Settings.options.specialEventOverride = true;
+                Settings.options.specialEventOutfit = 0;
+
+                Settings.options.Save();
+                Settings.HideEverythingWhenSpecialOverride(true);
+            }
+
+
         }
 
 
@@ -190,32 +205,9 @@ namespace Personality
             {
                 startLoading = false;
                 characterIsLoaded = false;
-
-                //alreadyStarted = false;
             }
         }
 
-        /*
-        [HarmonyPatch(typeof(PlayerManager), nameof(PlayerManager.Deserialize))]
-        public class Start
-        {
-            public static void Postfix()
-            {
-                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start");
-                if (!Utility.IsScenePlayable()) return;
-                //if (alreadyStarted) return;
-                //if (SceneNameMapping.IsChildOfAnother(GameManager.m_ActiveScene)) return;
-                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start - do");
-                
-                needVariableUpdate = true;
-                //alreadyStarted = true;
-
-                if (PlayerManager.m_VoicePersona == VoicePersona.Female) Settings.options.selectedCharacter = 0;
-                if (PlayerManager.m_VoicePersona == VoicePersona.Male) Settings.options.selectedCharacter = 1;
-                Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start - done");
-            }
-        }
-        */
 
         public static void InitializeHands()
         {
@@ -262,6 +254,8 @@ namespace Personality
                     }
                 }
 
+                Equipment.RegisterEquip("Event-Halloween2023", Character.Astrid, Slot.Shirt, "", LoadAndSetupFromBundle(customEventsBundle).transform.Find(prefix + "Halloween2023").gameObject, null, null);
+
                 Utility.Log(System.ConsoleColor.Yellow, "InitializeHands - Astrid - done");
             }
 
@@ -291,6 +285,9 @@ namespace Personality
                         Equipment.RegisterEquip(e.Key, Character.Will, e.Value.clothingSlot, "", normalVariant, maskedVariant, injuredVariant, e.Value.specialFlag);
                     }
                 }
+
+                Equipment.RegisterEquip("Event-Halloween2023", Character.Will, Slot.Shirt, "", LoadAndSetupFromBundle(customEventsBundle).transform.Find(prefix + "Halloween2023").gameObject, null, null);
+
 
                 Utility.Log(System.ConsoleColor.Yellow, "InitializeHands - Will - done");
             }
