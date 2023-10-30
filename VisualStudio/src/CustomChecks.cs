@@ -52,6 +52,8 @@ namespace Personality
             //if (GameManager.GetPlayerManagerComponent().m_ItemInHands && !skipItemInHandsCheckOnce) skipItemInHandsCheckOnce = true;
             //if (!CCMain.startLoading) skipItemInHandsCheckOnce = false;
 
+            if (Settings.options.specialEventOverride) return false;
+
             if (!CCMain.characterIsLoaded) return false;
 
             if (!Settings.options.dynamicOutfit || !GameManager.GetPlayerManagerComponent() || !(CCMain.allLoadCompleteAstrid || CCMain.allLoadCompleteWill)) return false; // || Settings.options.displayProperClothes
