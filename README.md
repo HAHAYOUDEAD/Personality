@@ -1,3 +1,5 @@
+## Community created custom meshes are available in [my channel on TLD Modding Discord](https://discord.com/invite/2tWMRE5tZp)
+
 # 0.7.0 - Stripped version
 Since Hinterland added their own first person clothing, main purpose of this mod is lost.
 
