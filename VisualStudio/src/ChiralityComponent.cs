@@ -1,6 +1,8 @@
 ﻿using MelonLoader;
 using UnityEngine;
 
+namespace Personality;
+
 [RegisterTypeInIl2Cpp]
 public class Chirality : MonoBehaviour
 {
@@ -8,7 +10,7 @@ public class Chirality : MonoBehaviour
     public bool isLeftHanded;
     void LateUpdate()
     {
-        if (gameObject != null && isLeftHanded)
+        if (gameObject != null && Settings.options.leftHanded)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }

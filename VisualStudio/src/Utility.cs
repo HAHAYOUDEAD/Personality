@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿global using Il2CppVLB;
+using MelonLoader;
 using UnityEngine;
 using System;
 using System.IO;
@@ -7,6 +8,7 @@ using Il2CppSystem.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 using Il2Cpp;
+
 
 namespace Personality
 {
@@ -87,8 +89,67 @@ namespace Personality
             }
             return list;
         }
-    }
 
+        public static Texture2D ToTexture2D(this Texture texture)
+        {
+
+            Texture2D newTex = new Texture2D(texture.width, texture.height);
+            RenderTexture renderTexture = new RenderTexture(texture.width, texture.height, 32);
+
+            Graphics.Blit(texture, renderTexture);
+
+            RenderTexture.active = renderTexture;
+
+            newTex.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+            newTex.Apply();
+
+            renderTexture.Release();
+
+
+            return newTex;
+        }
+
+        public static T GetCopyOf<T>(this Component comp, T other) where T : Component
+        {
+            Il2CppSystem.Type typeT = comp.GetIl2CppType();
+            if (typeT != other.GetIl2CppType()) return null; // type mis-match
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default | BindingFlags.DeclaredOnly;
+            PropertyInfo[] pinfos = typeT.GetProperties(flags);
+            foreach (var pinfo in pinfos)
+            {
+                if (pinfo.CanWrite)
+                {
+                    try
+                    {
+                        pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
+                    }
+                    catch { } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
+                }
+            }
+            FieldInfo[] finfos = typeT.GetFields(flags);
+            foreach (var finfo in finfos)
+            {
+                finfo.SetValue(comp, finfo.GetValue(other));
+            }
+            return comp as T;
+        }
+
+        public static T AddComponent<T>(this GameObject go, T toAdd) where T : Component
+        {
+            return go.AddComponent<T>().GetCopyOf(toAdd) as T;
+        }
+
+        public static Transform FindDeepChild(this Transform parent, string childName)
+        {
+
+            foreach (Transform g in parent.GetComponentsInChildren<Transform>())
+            {
+                if (g.name == childName) return g;
+            }
+
+            return null;
+        }
+    }
 
 
     public static class Utility
@@ -120,42 +181,6 @@ namespace Personality
             MelonAssembly assembly = MelonAssembly.LoadedAssemblies.FirstOrDefault(obj => obj.Assembly.GetName().Name.Contains(assemblyName));
             return (assembly != null);
         }
-
-
-        public static T GetCopyOf<T>(this Component comp, T other) where T : Component
-        {
-            Il2CppSystem.Type typeT = comp.GetIl2CppType();
-            if (typeT != other.GetIl2CppType()) return null; // type mis-match
-            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default | BindingFlags.DeclaredOnly;
-            PropertyInfo[] pinfos = typeT.GetProperties(flags);
-            foreach (var pinfo in pinfos)
-            {
-                if (pinfo.CanWrite)
-                {
-                    try
-                    {
-                        pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
-                    }
-                    catch { } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
-                }
-            }
-            FieldInfo[] finfos = typeT.GetFields(flags);
-            foreach (var finfo in finfos)
-            {
-                finfo.SetValue(comp, finfo.GetValue(other));
-            }
-            return comp as T;
-        }
-
-
-
-        public static T AddComponent<T>(this GameObject go, T toAdd) where T : Component
-        {
-            return go.AddComponent<T>().GetCopyOf(toAdd) as T;
-        }
-
-
-
 
         public static string GetGameObjectPath(GameObject obj)
         {
@@ -189,17 +214,6 @@ namespace Personality
             return null;
         }
         */
-
-        public static Transform FindDeepChild(Transform parent, string childName)
-        {
-
-            foreach (Transform g in parent.GetComponentsInChildren<Transform>())
-            {
-                if (g.name == childName) return g;
-            }
-
-            return null;
-        }
 
         public static List<Transform> GetAllChildrenRecursive(Transform parent)
         {

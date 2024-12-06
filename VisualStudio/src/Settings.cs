@@ -15,7 +15,6 @@ namespace Personality
             options = new CCSettings();
             options.AddToModSettings("Personality", MenuType.InGameOnly);
             ExpandTextureColoring(options.useTextureTint);
-            ExpandMeshCustomization(options.displayProperClothes);
             HideEverythingWhenSpecialOverride(options.specialEventOverride);
         }
 
@@ -26,30 +25,24 @@ namespace Personality
             options.SetFieldVisible(nameof(options.skinTextureLum), visible);
         }
 
-        internal static void ExpandMeshCustomization(bool visible)
-        {
-            options.SetFieldVisible(nameof(options.mittensAppearance), visible);
-
-            //options.SetFieldVisible(nameof(options.dynamicOutfit), !visible);
-            options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
-        }
 
         internal static void HideEverythingWhenSpecialOverride(bool visible)
         {
             options.SetFieldVisible(nameof(options.specialEventOutfit), visible);
+            options.SetFieldVisible(nameof(options.forceDisplayClothes), visible);
 
             //options.SetFieldVisible(nameof(options.selectedCharacter), !visible);
-            options.SetFieldVisible(nameof(options.dynamicOutfit), !visible);
-            options.SetFieldVisible(nameof(options.displayProperClothes), !visible);
-            options.SetFieldVisible(nameof(options.mittensAppearance), !visible);
-            options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
-            options.SetFieldVisible(nameof(options.enableTrinkets), !visible);
-            options.SetFieldVisible(nameof(options.useCustomTextures), !visible);
-            options.SetFieldVisible(nameof(options.useTextureTint), !visible);
-            options.SetFieldVisible(nameof(options.skinTextureHue), !visible);
-            options.SetFieldVisible(nameof(options.skinTextureSat), !visible);
-            options.SetFieldVisible(nameof(options.skinTextureLum), !visible);
-            options.SetFieldVisible(nameof(options.reloadTextures), !visible);
+            //options.SetFieldVisible(nameof(options.dynamicOutfit), !visible);
+            //options.SetFieldVisible(nameof(options.displayProperClothes), !visible);
+            //options.SetFieldVisible(nameof(options.mittensAppearance), !visible);
+            //options.SetFieldVisible(nameof(options.defaultAppearance), !visible);
+            //options.SetFieldVisible(nameof(options.enableTrinkets), !visible);
+            //options.SetFieldVisible(nameof(options.useCustomTextures), !visible);
+            //options.SetFieldVisible(nameof(options.useTextureTint), !visible);
+            //options.SetFieldVisible(nameof(options.skinTextureHue), !visible);
+            //options.SetFieldVisible(nameof(options.skinTextureSat), !visible);
+            //options.SetFieldVisible(nameof(options.skinTextureLum), !visible);
+            //options.SetFieldVisible(nameof(options.reloadTextures), !visible);
 
         }
 
@@ -60,20 +53,25 @@ namespace Personality
     {
         [Section("Specials")]
         [Name("Enable override")]
-        [Description("Turn on a special outfit override, for thematic events. \n\nDefault: false")]
+        [Description("Turn on a special outfit override, for thematic events or whatever else I came up with \n\nDefault: false")]
         public bool specialEventOverride = false;
 
         [Name("Special outfit")]
-        [Description("Select the occasion")]
+        [Description("Select the occasion \n\nTribute - classic Will and Astrid outfits\nHalloween 2023 - Plague Witch costume for Astrid and Pirate Skeleton for Will\nCustom - will load your custom model from '.../Mods/personality/custom' bundle")]
         [Choice(new string[]
         {
+            "Tribute",
             "Halloween 2023",
-            "Placeholder(does nothing)"
+            "Custom"
         })]
         public int specialEventOutfit;
 
-        [Section("Mesh customization")]
+        [Name("Keep clothes")]
+        [Description("Keep clothes when override is enabled. Only works for supported meshes. \n\nDefault: false")]
+        public bool forceDisplayClothes = false;
 
+        //[Section("Customization")]
+        /*
         [Name("Character")]
         [Description("You can change your survivor here")]
         [Choice(new string[]
@@ -82,47 +80,12 @@ namespace Personality
             "Will"
         })]
         public int selectedCharacter;
+        */
         /*
         [Name("Left-handed")]
         [Description("Make your character left-handed. \n\nDefault: false")]
         public bool leftHanded = false;
         */
-        [Name("Dynamic outfit")]
-        [Description("Automatically switch between outdoors/indoors/injured outfits. \n\nOnly changes when arms are hidden to preserve immersion. \n\nDefault: true")]
-        public bool dynamicOutfit = true;
-
-        [Name("Display current clothes")]
-        [Description("This is very much incomplete, only a small part of clothes are covered. If piece of clothing you're wearing is not implemented yet - it will default to classic charachter outfit. \n\nDefault: true")]
-        public bool displayProperClothes = true;
-
-        [Name("Mittens")]
-        [Description("How do you like your mittens(and large gloves)?\n\n" +
-            "Always on - don't take off mittens. May look wack in some situations\n\n" +
-            "Dynamic - take one mitten off when need free hand\n\n" +
-            "Dynamic and fun - dangle from a string when need free hand. Works when you have a jacket on, otherwise same as Dynamic\n\n" +
-            "Default: Dynamic and fun")]
-        [Choice(new string[]
-        {
-            "Always on",
-            "Dynamic",
-            "Dynamic and fun"
-        })]
-        public int mittensAppearance = 2;
-
-        [Name("Default outfit")]
-        [Description("How your character looks by default. Has no effect if Dynamic outfit is on. \n\nDefault: Vanilla")]
-        [Choice(new string[]
-        {
-            "Vanilla",
-            "Full outfit",
-            "Injured",
-            "Undressed"
-        })]
-        public int defaultAppearance;
-
-        [Name("Enable trinkets")]
-        [Description("Show trinkets on character's hands. \n\nDefault: false")]
-        public bool enableTrinkets = false;
 
         [Section("Texture customization")]
 
@@ -134,17 +97,17 @@ namespace Personality
         [Description("Customize textures by tinting them with HSL values \n\nDefault: false")]
         public bool useTextureTint = false;
 
-        [Name("Skin texture HUE")]
+        [Name("Skin texture Hue")]
         [Description("Hue is limited to 10-30 degrees, which is more or less in human skin tone range \n\nLow value = red\n\nHigh value = yellow")]
         [Slider(10, 30)]
         public int skinTextureHue = 10;
 
-        [Name("Skin texture SATuration")]
+        [Name("Skin texture Saturation")]
         [Description("Saturation is limited because I'm boring \n\nLow value = less saturated color\n\nHigh value = more saturated value")]
         [Slider(20, 50)]
         public int skinTextureSat = 20;
 
-        [Name("Skin texture LUMinocity")]
+        [Name("Skin texture Luminocity")]
         [Description("Luminocity is a bit limited as well\n\nLow value = dark \n\nHigh value = light \n\nSetting this to 100 will make texture unchanged ")]
         [Slider(10, 100)]
         public int skinTextureLum = 100;
@@ -154,6 +117,10 @@ namespace Personality
         public bool reloadTextures = false;
 
         [Section("Misc settings")]
+
+        [Name("Left-handed")]
+        [Description("Make your character left-handed. Experimental feature")]
+        public bool leftHanded = false;
 
         [Name("Hands Field of View")]
         [Description("NOT regular camera FOV, this lets you see more of your character's hands.\n\nNot intended to be changed like this, so some animations might look off")]
@@ -167,17 +134,44 @@ namespace Personality
         })]
         public int weaponCameraFov;
 
+        [Name("Hide gloves")]
+        [Description("Keep bare hands, doesn't affect the actual item being worn, it's only visual")]
+        public bool hideGloves = false;
+
         [Section("Debug/incomplete stuff")]
 
         [Name("Enable debug messages")]
         [Description("To help developer find the issue")]
         public bool debugLog = false;
 
+        /*
+        [Name("WIP ! Dynamic outfit")]
+        [Description("Take off jacket and gloves when indoors. \n\nOnly changes when arms are hidden to preserve immersion. \n\nDoesn't actually remove clothes, only visually \n\nDefault: false")]
+        public bool dynamicOutfit = false;
+
+        [Name("WIP ! Mittens")]
+        [Description("How do you like your mittens?\n\n" +
+            "Always on - vanilla\n\n" +
+            "Dynamic - take one mitten off when need free hand\n\n" +
+            "Dynamic and fun - dangle from a string when need free hand. Works when you have a jacket on, otherwise you just take it off\n\n" +
+            "Default: Dynamic and fun")]
+        [Choice(new string[]
+        {
+            "Always on",
+            "Dynamic",
+            "Dynamic and fun"
+        })]
+        public int mittensAppearance = 2;
+
+        [Name("WIP ! Enable trinkets")]
+        [Description("Show trinkets on character's hands. \n\nDefault: false")]
+        public bool enableTrinkets = false;
+        */
+
 
         protected override void OnChange(FieldInfo field, object oldValue, object newValue)
         {
             if (field.Name == nameof(useTextureTint)) Settings.ExpandTextureColoring((bool)newValue);
-            if (field.Name == nameof(displayProperClothes)) Settings.ExpandMeshCustomization((bool)newValue);
             if (field.Name == nameof(specialEventOverride))
             {
                 Settings.HideEverythingWhenSpecialOverride((bool)newValue);
@@ -187,7 +181,7 @@ namespace Personality
 
         protected override void OnConfirm()
         {
-
+            /*
             switch (Settings.options.selectedCharacter)
             {
                 case 0: // Astrid
@@ -212,34 +206,46 @@ namespace Personality
 
                     break;
             }
+            */
+
+            if (Settings.options.specialEventOverride)
+            {
+                CCSetup.OverrideOutfitForEvent();
+            }
+            else
+            {
+                CCSetup.KillCustomMeshes();
+            }
 
             if (Settings.options.reloadTextures)
             {
-                MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 0, 3));
-                MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 0, 5));
+                MelonCoroutines.Start(CCSetup.DoEverything(0, 3));
+                MelonCoroutines.Start(CCSetup.DoEverything(0, 5));
                 Settings.options.reloadTextures = false;
+            }
+            else
+            {
+                CCSetup.ChangeHandsTexture(Settings.options.useCustomTextures);
+                CCSetup.ChangeGearTexture(Settings.options.useCustomTextures);
             }
 
 
             if (Settings.options.useTextureTint)
             {
-                CCSetup.TintTexture(Slot.Hands, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
-                CCSetup.TintTexture(Slot.Arms, Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
+                CCSetup.TintTexture(Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
+                CCSetup.TintTexture(Settings.options.skinTextureHue, Settings.options.skinTextureSat, Settings.options.skinTextureLum);
             }
             else
             {
-                CCSetup.TintTexture(Slot.Hands, 0, 0, 100);
-                CCSetup.TintTexture(Slot.Arms, 0, 0, 100);
+                CCSetup.TintTexture(0, 0, 100);
+                CCSetup.TintTexture(0, 0, 100);
             }
 
             //CCMain.characterChirality.isLeftHanded = Settings.options.leftHanded;
 
-            if (!Settings.options.specialEventOverride)
-            {
-                CCSetup.SetClothesToDefault();
-            }
 
-            CCSetup.SmartUpdateOutfit();
+            
+            //CCSetup.SmartUpdateOutfit();
 
             base.OnConfirm();
         }

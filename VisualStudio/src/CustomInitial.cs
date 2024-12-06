@@ -10,6 +10,9 @@ using HarmonyLib;
 using System.Linq;
 using Il2CppTLD;
 using Il2Cpp;
+using UnityEngine.AddressableAssets.ResourceLocators;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Personality
 {
@@ -58,11 +61,18 @@ namespace Personality
         public static GameObject vanillaCharacter;
         public static Chirality characterChirality;
 
+        public static ClothingSpawner vanillaClothingComponent;
+
         public static AssetBundle customArmsBundleAstrid;
         public static AssetBundle customArmsBundleWill;
         public static AssetBundle customPhysicsBundle;
         public static AssetBundle customTrinketsBundle;
         public static AssetBundle customEventsBundle;
+
+        public static AssetBundle everythingBundle;
+        public static readonly string everythingBundleName = "everything";
+        public static AssetBundle customBundle;
+        public static readonly string customBundleName = "custom";
 
         public static GameObject physicsObject;
         public static GameObject trinketsObject;
@@ -133,22 +143,31 @@ namespace Personality
         public static object mainCoroutine;
 
         public static string modsPath;
+        public static readonly string modAssetPrefix = "Personality_";
         public static readonly string modFolderName = "personality/";
+        public static readonly string textureFolderName = modFolderName + "customTextures/";
+        public static readonly string gearTextureFolderName = modFolderName + "customGearTextures/";
+        public static readonly string paperDollFolderName = textureFolderName + "paperDoll/";
+        
+
+
 
         public override void OnInitializeMelon()
         {
             // Load assets
             string path = "Mods/" + modFolderName;
 
-            customArmsBundleAstrid = AssetBundle.LoadFromFile(path + "bundleastrid");
-            customArmsBundleWill = AssetBundle.LoadFromFile(path + "bundlewill");
-            customPhysicsBundle = AssetBundle.LoadFromFile(path + "customphysics");
-            customTrinketsBundle = AssetBundle.LoadFromFile(path + "trinkets");
-            
+            //customArmsBundleAstrid = AssetBundle.LoadFromFile(path + "bundleastrid");
+            //customArmsBundleWill = AssetBundle.LoadFromFile(path + "bundlewill");
+            //customPhysicsBundle = AssetBundle.LoadFromFile(path + "customphysics");
+            //customTrinketsBundle = AssetBundle.LoadFromFile(path + "trinkets");
+            everythingBundle = AssetBundle.LoadFromFile(path + everythingBundleName);
+            customBundle = AssetBundle.LoadFromFile(path + customBundleName);
+
 
             path += "clothingBundles/";
-            clothingBundles.Add(cb_handmade, AssetBundle.LoadFromFile(path + cb_handmade));
-            customEventsBundle = AssetBundle.LoadFromFile(path + cb_events);
+            //clothingBundles.Add(cb_handmade, AssetBundle.LoadFromFile(path + cb_handmade));
+            //customEventsBundle = AssetBundle.LoadFromFile(path + cb_events);
 
 
             // Get Mods folder path
@@ -172,16 +191,37 @@ namespace Personality
             }
 
 
+            string catalogFilePath = "Mods/" + modFolderName + "modClothes/catalog_Personality.json";
+            //MelonCoroutines.Start(LoadAddressables());
+            try
+            {
+                IResourceLocator catalogLocator = Addressables.LoadContentCatalogAsync(catalogFilePath).WaitForCompletion();
+                if (catalogLocator != null && catalogLocator.Keys != null)
+                {
+                    MelonLogger.Msg("Catalog Loaded (catalog_Personality) ");
+                }
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Msg("Catalog Failed (catalog_Personality) " + e.ToString());
+            }
+            //Addressables.LoadContentCatalogAsync().WaitForCompletion();
+
+            //GameObject testItem = Addressables.LoadAssetAsync<GameObject>("FPH_deerSkinGloves_M").WaitForCompletion();
+            //MelonLogger.Msg($"ADDRESSABLE TEST: {testItem.name}");
+            /*
+            AssetReferenceFirstPersonClothing fpc = new AssetReferenceFirstPersonClothing("FPH_deerSkinGloves_M");
+            MelonLogger.Msg("a " + fpc);
+            GameObject testItem = fpc.LoadAsset().WaitForCompletion();
+            MelonLogger.Msg("b " + testItem);
+            MelonLogger.Msg($"ADDRESSABLE TEST: {testItem.name}");
+            */
         }
 
 
         public override void OnSceneWasLoaded(int level, string name)
         {
-            if (!Utility.IsScenePlayable(name))
-            {
-                CCSetup.currentCharacter = Character.Undefined;
-            }
-            else
+            if (Utility.IsScenePlayable(name))
             {
                 startLoading = true;
             }
@@ -209,8 +249,19 @@ namespace Personality
         }
 
 
+        public IEnumerator LoadAddressables()
+        {
+            //Load a catalog and automatically release the operation handle.
+            AsyncOperationHandle<IResourceLocator> handle = Addressables.LoadContentCatalogAsync(modsPath + modFolderName + "modClothes/catalog_Personality.json", true);
+            yield return handle;
+
+            //...
+        }
+
+
         public static void InitializeHands()
         {
+            /*
             string prefix;
 
             //1 - set name | 2 - character enum | 3 - slot enum | 4 - texture name(to look for when using custom) | 5 - GO for normal variant | 6 - GO for maask variant | 7 - GO for injured variant
@@ -293,7 +344,7 @@ namespace Personality
             }
 
             
-
+            */
 
         }
 
@@ -333,6 +384,7 @@ namespace Personality
                     //CCSetup.currentCharacter = Character.Will;
                 }
                 */
+                /*
                 if (Settings.options.selectedCharacter == 0)
                 {
                     CCSetup.currentCharacter = Character.Astrid;
@@ -344,11 +396,13 @@ namespace Personality
                     PlayerManager.m_VoicePersona = VoicePersona.Male;
                 }
 
-                needVariableUpdate = true;
-
                 GameManager.GetPlayerVoiceComponent().SetPlayerVoicePersona();
+                */
 
 
+
+
+                needVariableUpdate = true;
                 Utility.Log(System.ConsoleColor.Yellow, "PlayerManager.Start - done");
             }
         }
@@ -356,13 +410,13 @@ namespace Personality
         [HarmonyPatch(typeof(PlayerVoice), nameof(PlayerVoice.SetPlayerVoicePersona))]
         public class CharacterChange
         {
-            static bool? characterLoadComplete = null;
+            static bool characterLoadComplete = false;
 
             public static void Postfix()
             {
                 if (!startLoading) return;
 
-                
+                /*
 
                 if (Settings.options.selectedCharacter == 0 && PlayerManager.m_VoicePersona == VoicePersona.Female) // Astrid
                 {
@@ -374,6 +428,7 @@ namespace Personality
                     CCSetup.currentCharacter = Character.Will;
                     characterLoadComplete = allLoadCompleteWill;
                 }
+                */
                 /*
                 if (Settings.options.selectedCharacter == 2 && PlayerManager.m_VoicePersona == VoicePersona.Female) // Marcene
                 {
@@ -384,28 +439,10 @@ namespace Personality
                     CCSetup.currentCharacter = Character.Lincoln;
                 }
                 */
-                if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"Character recognized as {CCSetup.currentCharacter}");
-
-                if (characterLoadComplete == null) return;
-
-                if (characterLoadComplete == false) // initial load
-                {
-                    InitializeHands();
-                    if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"Initial load for {CCSetup.currentCharacter}");
-                    if (mainCoroutine != null) MelonCoroutines.Stop(mainCoroutine);
-                    mainCoroutine = MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 5));
-                    needVariableUpdate = false;
-                    return;
-                }
-                if (needVariableUpdate) // bump after stripping
-                {
-                    InitializeHands();
-                    if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"Bump for {CCSetup.currentCharacter}");
-                    if (mainCoroutine != null) MelonCoroutines.Stop(mainCoroutine);
-                    mainCoroutine = MelonCoroutines.Start(CCSetup.DoEverything(CCSetup.currentCharacter, 3));
-                    needVariableUpdate = false;
-                    return;
-                }
+                
+                if (Settings.options.debugLog) MelonLogger.Msg(System.ConsoleColor.DarkGreen, $"Initial load for {CCSetup.getCurrentChar()}");
+                if (mainCoroutine != null) MelonCoroutines.Stop(mainCoroutine);
+                mainCoroutine = MelonCoroutines.Start(CCSetup.DoEverything(5));
             }
         }
 
