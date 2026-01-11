@@ -154,24 +154,25 @@ namespace Personality
 
         public override void OnInitializeMelon()
         {
+            // Get Mods folder path
+            modsPath = Path.GetFullPath(typeof(MelonMod).Assembly.Location + "\\..\\..\\..\\Mods/");
+
             // Load assets
-            string path = "Mods/" + modFolderName;
 
             //customArmsBundleAstrid = AssetBundle.LoadFromFile(path + "bundleastrid");
             //customArmsBundleWill = AssetBundle.LoadFromFile(path + "bundlewill");
             //customPhysicsBundle = AssetBundle.LoadFromFile(path + "customphysics");
             //customTrinketsBundle = AssetBundle.LoadFromFile(path + "trinkets");
-            everythingBundle = AssetBundle.LoadFromFile(path + everythingBundleName);
-            customBundle = AssetBundle.LoadFromFile(path + customBundleName);
+            everythingBundle = AssetBundle.LoadFromFile(modsPath + modFolderName + everythingBundleName);
+            customBundle = AssetBundle.LoadFromFile(modsPath + modFolderName + customBundleName);
 
 
-            path += "clothingBundles/";
+            //path += "clothingBundles/";
             //clothingBundles.Add(cb_handmade, AssetBundle.LoadFromFile(path + cb_handmade));
             //customEventsBundle = AssetBundle.LoadFromFile(path + cb_events);
 
 
-            // Get Mods folder path
-            modsPath = Path.GetFullPath(typeof(MelonMod).Assembly.Location + "\\..\\..\\Mods");
+
 
             // Get shaders
             CCSetup.vanillaSkinnedShader = Shader.Find("Shader Forge/TLD_StandardSkinned");
@@ -191,7 +192,7 @@ namespace Personality
             }
 
 
-            string catalogFilePath = "Mods/" + modFolderName + "modClothes/catalog_Personality.json";
+            string catalogFilePath = Path.GetFullPath(typeof(MelonMod).Assembly.Location + "\\..\\..\\..\\Mods/" + modFolderName) + "/modClothes/catalog_Personality.json";
             //MelonCoroutines.Start(LoadAddressables());
             try
             {

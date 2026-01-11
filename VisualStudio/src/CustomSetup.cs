@@ -10,7 +10,6 @@ using System.Linq;
 using Il2Cpp;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UIElements;
-using static Il2Cppgw.gql.Interpreter;
 using System.Net.NetworkInformation;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -960,7 +959,7 @@ namespace Personality
                     {
                         Utility.Log(System.ConsoleColor.Gray, "Looking for vanilla hands...");
                         CCMain.vanillaClothingComponent = CCMain.vanillaCharacter.transform.Find("NEW_FPHand_Rig")?.GetComponent<ClothingSpawner>();
-                        CCMain.vanillaClothingComponent.gameObject.GetOrAddComponent<Chirality>();
+                        CCMain.vanillaClothingComponent?.gameObject.GetOrAddComponent<Chirality>();
                         yield return new WaitForEndOfFrame();
                     }
                     isLoaded = GetVanillaHandsObject(character)[0];
