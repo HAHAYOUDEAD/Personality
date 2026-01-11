@@ -5,7 +5,7 @@ Since Hinterland added their own first person clothing, main purpose of this mod
 
 Current features:
 - hands/arms and paper doll texture replacement and tint(to imitate skin tones)
-- custom event outfits
+- custom event outfits, you can load custom meshes too, for that get `custom` file from discord(link above) and place in `.../Mods/Personality/`
 - hands FOV setting
 - option to replace character arms with your own custom mesh (check instructions [here](https://github.com/HAHAYOUDEAD/Personality/wiki#custom-mesh-creation)⁠)
 - option to hide gloves
